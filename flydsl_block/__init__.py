@@ -26,6 +26,7 @@ try:  # the FlyDSL layer is optional so the planning core stays importable on CP
         BlockFragment,
         Mma,
         MmaSpec,
+        Shared,
         dot,
         full,
         load,
@@ -34,6 +35,19 @@ try:  # the FlyDSL layer is optional so the planning core stays importable on CP
         zeros,
     )
 
-    __all__ += ["BlockFragment", "Blocked", "TV", "Mma", "MmaSpec", "load", "store", "dot", "wrap", "zeros", "full"]
+    __all__ += [
+        "BlockFragment",
+        "Blocked",
+        "TV",
+        "Mma",
+        "MmaSpec",
+        "Shared",
+        "load",
+        "store",
+        "dot",
+        "wrap",
+        "zeros",
+        "full",
+    ]
 except ImportError:  # pragma: no cover
     pass

@@ -252,3 +252,113 @@ def test_interop_wrap_and_frag():
     ref = a.float() @ b.float().T
     torch.testing.assert_close(c, ref * 2, rtol=1e-3, atol=1e-3)
     torch.testing.assert_close(r, ref.amax(1), rtol=1e-3, atol=1e-3)
+
+
+def _kperm():
+    """8 contiguous K per lane feed two 16x16x16 MFMAs (tutorial v0 trick)."""
+    return fx.make_layout((4, 4, 2), (1, 8, 4))
+
+
+def _warp_rows():
+    """each of the 2 warps owns 32 contiguous rows of a 64-row tile (repeats inside the tiled tile)"""
+    return fx.make_layout((16, 2, 2), (1, 32, 16))
+
+
+TILED_MMAS = {
+    "kperm": lambda atom: fx.make_tiled_mma(
+        atom, fx.make_layout((2, 2, 1), (1, 2, 0)), fx.make_tile(None, None, _kperm())
+    ),
+    "mn_kperm": lambda atom: fx.make_tiled_mma(
+        atom, fx.make_layout((2, 2, 1), (1, 2, 0)), fx.make_tile(_warp_rows(), _warp_rows(), _kperm())
+    ),
+}
+
+
+@pytest.mark.parametrize("name", list(TILED_MMAS))
+def test_dot_permuted_tiled_mma(name):
+    bm, bn, bk, K = 128, 64, 32, 128
+
+    @flyc.kernel
+    def kern(A: fx.Tensor, B: fx.Tensor, C: fx.Tensor):
+        tm = TILED_MMAS[name](fx.make_mma_atom(fx.rocdl.MFMA(16, 16, 16, fx.BFloat16)))
+        sa, sb, sc = blk.Mma(tm, "A", (bm, bk)), blk.Mma(tm, "B", (bn, bk)), blk.Mma(tm, "C", (bm, bn))
+        gA = fx.flat_divide(fx.rocdl.make_buffer_tensor(A, max_size=False), (bm, bk))[None, None, 0, None]
+        gB = fx.flat_divide(fx.rocdl.make_buffer_tensor(B, max_size=False), (bn, bk))[None, None, 0, None]
+        acc = blk.zeros(sc, fx.Float32)
+        for kk in range(K // bk):
+            a, b = blk.load(gA[None, None, kk], sa), blk.load(gB[None, None, kk], sb)
+            acc = blk.dot(a, b, acc, traversal_order=fx.GemmTraversalOrder.KNM)
+        blk.store(tile2d(C, bm, bn), acc)
+
+    @flyc.jit
+    def launch(A: fx.Tensor, B: fx.Tensor, C: fx.Tensor, stream: fx.Stream = fx.Stream(None)):
+        kern(A, B, C).launch(grid=(1, 1, 1), block=(THREADS, 1, 1), stream=stream)
+
+    a = torch.randn(bm, K, device="cuda").to(torch.bfloat16)
+    b = torch.randn(bn, K, device="cuda").to(torch.bfloat16)
+    c = torch.zeros(bm, bn, device="cuda")
+    launch(a, b, c, stream=torch.cuda.current_stream())
+    torch.cuda.synchronize()
+    torch.testing.assert_close(c, a.float() @ b.float().T, rtol=1e-3, atol=1e-3)
+
+
+def test_load_nested_view():
+    """Preshuffled input: (m, k) = (16 * rb + row, 8 * kg + e) at e + 8 * row + 128 * kg + 512 * rb."""
+    bm, bk = 128, 32
+
+    @flyc.kernel
+    def kern(X: fx.Tensor, Y: fx.Tensor):
+        layout = fx.make_layout(((16, bm // 16), (8, 4)), ((8, 512), (1, 128)))
+        x = blk.load(fx.make_view(fx.get_iter(X), layout), blk.Blocked((bm, bk), (1, 8), (16, 4), (4, 1)))
+        blk.store(tile2d(Y, bm, bk), x)
+
+    @flyc.jit
+    def launch(X: fx.Tensor, Y: fx.Tensor, stream: fx.Stream = fx.Stream(None)):
+        kern(X, Y).launch(grid=(1, 1, 1), block=(THREADS, 1, 1), stream=stream)
+
+    y_ref = torch.randn(bm, bk, device="cuda").to(torch.bfloat16)
+    x = y_ref.view(bm // 16, 16, 4, 8).permute(0, 2, 1, 3).contiguous()
+    y = torch.zeros_like(y_ref)
+    launch(x, y, stream=torch.cuda.current_stream())
+    torch.cuda.synchronize()
+    assert torch.equal(y, y_ref)
+
+
+@pytest.mark.parametrize("max_phase", [1, 8])
+def test_shared_swizzle(max_phase):
+    """global -> Shared (swizzled) -> MMA A layout -> global, plus the raw LDS placement."""
+    rows, cols = 128, 64
+
+    @fx.struct
+    class Smem:
+        a: fx.Array[fx.BFloat16, rows * cols, 16]
+
+    @flyc.kernel
+    def kern(X: fx.Tensor, Y: fx.Tensor, Raw: fx.Tensor):
+        lds = fx.SharedAllocator().allocate(Smem).peek()
+        s = blk.Shared(lds.a, (rows, cols), vec=8, max_phase=max_phase)
+        tm = TILED_MMAS["mn_kperm"](fx.make_mma_atom(fx.rocdl.MFMA(16, 16, 16, fx.BFloat16)))
+        stage = blk.Blocked((rows, cols), (1, 8), (8, 8), (4, 1))
+        blk.store(s, blk.load(tile2d(X, rows, cols), stage))
+        fx.gpu.barrier()
+        for h in fx.range_constexpr(2):
+            a = blk.load(s.slice(32 * h, 32, dim=1), blk.Mma(tm, "A", (rows, 32)))
+            blk.store(fx.flat_divide(fx.rocdl.make_buffer_tensor(Y, max_size=False), (rows, 32))[None, None, 0, h], a)
+        raw = blk.load(lds.a.view(fx.make_layout((rows, cols), (cols, 1))), stage)
+        blk.store(tile2d(Raw, rows, cols), raw)
+
+    @flyc.jit
+    def launch(X: fx.Tensor, Y: fx.Tensor, Raw: fx.Tensor, stream: fx.Stream = fx.Stream(None)):
+        kern(X, Y, Raw).launch(grid=(1, 1, 1), block=(THREADS, 1, 1), stream=stream)
+
+    x = torch.randn(rows, cols, device="cuda").to(torch.bfloat16)
+    y, raw = torch.zeros_like(x), torch.zeros_like(x)
+    launch(x, y, raw, stream=torch.cuda.current_stream())
+    torch.cuda.synchronize()
+    assert torch.equal(y, x)
+    r = torch.arange(rows, device="cuda")[:, None]
+    c = torch.arange(cols, device="cuda")[None, :]
+    phys = r * cols + ((c // 8) ^ (r % max_phase)) * 8 + c % 8
+    expect = torch.zeros_like(x).view(-1)
+    expect[phys.reshape(-1)] = x.reshape(-1)
+    assert torch.equal(raw.view(-1), expect)

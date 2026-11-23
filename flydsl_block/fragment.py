@@ -18,6 +18,7 @@ from .linear import (
     blocked,
     copy_index,
     copy_plan,
+    log2,
     plan_convert,
     plan_reduce,
 )
@@ -28,6 +29,7 @@ __all__ = [
     "TV",
     "Mma",
     "MmaSpec",
+    "Shared",
     "load",
     "store",
     "dot",
@@ -55,6 +57,13 @@ def _as_tuple(t):
     return tuple(t) if isinstance(t, (tuple, list)) else (t,)
 
 
+def _size(t):
+    n = 1
+    for x in _flat(t):
+        n *= x
+    return n
+
+
 # --------------------------------------------------------------- layouts (A)
 def Blocked(shape, size_per_thread, threads_per_warp, warps=None, order=None) -> LinearLayout:
     """Triton/Gluon-style BlockedLayout; ``order`` lists dims fastest first."""
@@ -77,6 +86,7 @@ class MmaSpec:
     operand: str
     tile: tuple
     linear: LinearLayout
+    atom_bits: int = 0  # leading register bits that one MMA instruction holds
 
     def __extract_to_ir_values__(self):
         return []
@@ -96,31 +106,41 @@ _MMA_CACHE = {}
 def Mma(tiled_mma, operand: str, tile) -> MmaSpec:
     """Operand layout of ``tiled_mma`` over ``tile`` ((M,K) for A, (N,K) for B, (M,N) for C).
 
-    Built from ``tiled_mma.tv_layout_{A,B,C}_tiled`` plus register repeats in
-    the order of ``make_fragment_X`` / ``tiled_mma_partition_shape``
-    ((V, repeat dim0, repeat dim1), colex).
+    Built from ``tiled_mma.tv_layout_{A,B,C}_tiled`` (one ``tile_size_mnk`` tile, values
+    ``(V, (repeats along dim 0, dim 1))``) plus the repeats of that tile over ``tile``.
+    Registers follow ``make_fragment_X``: ``(V, dim-0 repeats, dim-1 repeats)``, colex,
+    where in each dim the repeats inside one tiled tile (from a permutation) come first.
     """
     operand = operand.upper()
     tile = tuple(int(x) for x in tile)
     key = (str(tiled_mma.type), operand, tile)
-    lin = _MMA_CACHE.get(key)
-    if lin is None:
+    hit = _MMA_CACHE.get(key)
+    if hit is None:
         tv = {"A": tiled_mma.tv_layout_A_tiled, "B": tiled_mma.tv_layout_B_tiled, "C": tiled_mma.tv_layout_C_tiled}[
             operand
         ]
         m, n, k = tiled_mma.tile_size_mnk.to_py_value()
         sub = {"A": (m, k), "B": (n, k), "C": (m, n)}[operand]
-        lin = LinearLayout.from_tv(tv.shape.to_py_value(), tv.stride.to_py_value(), sub, _warp_size()).with_repeats(
-            tile
-        )
-        _MMA_CACHE[key] = lin
-    spec = MmaSpec(tiled_mma, operand, tile, lin)
-    nfrag = 1
-    for s in _flat(spec.partition_shape().to_py_value()):
-        nfrag *= s
-    if nfrag != lin.num_regs:
-        raise ValueError(f"MMA {operand} fragment has {nfrag} registers, layout expects {lin.num_regs}")
-    return spec
+        tv_shape = tv.shape.to_py_value()
+        lin = LinearLayout.from_tv(tv_shape, tv.stride.to_py_value(), sub, _warp_size()).with_repeats(tile)
+        vals = tv_shape[1]
+        if isinstance(vals, tuple) and len(vals) == 2 and isinstance(vals[1], tuple) and len(vals[1]) == 2:
+            nv, n0, n1 = log2(_size(vals[0])), log2(_size(vals[1][0])), log2(_size(vals[1][1]))
+        else:
+            nv, n0, n1 = log2(_size(vals)), 0, 0
+        o0, o1 = log2(tile[0] // sub[0]), log2(tile[1] // sub[1])
+        # lin registers: V, inner dim 0, inner dim 1, outer dim 0, outer dim 1
+        inner0 = list(range(nv, nv + n0))
+        inner1 = list(range(nv + n0, nv + n0 + n1))
+        outer0 = list(range(nv + n0 + n1, nv + n0 + n1 + o0))
+        outer1 = list(range(nv + n0 + n1 + o0, nv + n0 + n1 + o0 + o1))
+        lin = lin.reorder_regs(list(range(nv)) + inner0 + outer0 + inner1 + outer1)
+        fshape = fx.tiled_mma_partition_shape(getattr(fx.MmaOperand, operand), tiled_mma, tile).to_py_value()
+        want = (1 << nv, 1 << (n0 + o0), 1 << (n1 + o1))
+        if len(fshape) != 3 or tuple(_size(s) for s in fshape) != want:
+            raise NotImplementedError(f"MMA {operand} fragment {fshape} does not have the expected modes {want}")
+        hit = _MMA_CACHE[key] = (lin, nv)
+    return MmaSpec(tiled_mma, operand, tile, *hit)
 
 
 def _layout_of(layout):
@@ -187,6 +207,20 @@ def _atom_conds(layout: LinearLayout, order, nvec: int, bounds, owner_only: bool
     return conds
 
 
+def _mem_offset(coord, modes, strides):
+    """Element offset of a tile coordinate in a view whose dims may be nested modes
+    (None if it depends on a dynamic stride)."""
+    off = 0
+    for c, m, st in zip(coord, modes, strides):
+        for s, t in zip(_flat(m), _flat(st)):
+            if c % s:
+                if not isinstance(t, int):
+                    return None
+                off += (c % s) * t
+            c //= s
+    return off
+
+
 def _unflatten(i, shape):
     if isinstance(shape, int):
         return i
@@ -211,20 +245,42 @@ def _atom_slices(part, n_atoms):
     return [((None, _unflatten(a, pshape[0][1])),) + tail for a in range(n_atoms)]
 
 
-def _tile_copy(view, layout: LinearLayout, *, vec=None, bounds=None, other=0, max_vec=None, owner_only=False):
+def _tile_copy(
+    view, layout: LinearLayout, *, vec=None, bounds=None, other=0, max_vec=None, owner_only=False, keep_bits=0
+):
     """Copy a whole tile between ``view`` (global/LDS) and registers.
 
+    Each view dim may be a nested mode (e.g. ``((16, 8), (8, 4))``); vectors run
+    along the dim whose first sub-mode has stride 1, at most that sub-mode long.
+    Copy order: the vector, then register bits ``< keep_bits`` (one MMA
+    instruction's values), then the rest by memory offset.
     load: ``vec is None`` -> returns the registers in ``layout`` order.
     store: writes ``vec`` (``layout`` order).
     """
     shape = layout.shape
-    vshape = _as_tuple(view.shape.to_py_value())
-    if vshape != shape:
-        raise ValueError(f"view shape {vshape} does not match the layout tile {shape}")
+    modes = _as_tuple(view.shape.to_py_value())
     strides = _as_tuple(view.layout.stride.to_py_value())
-    unit_dim = next((d for d, s in enumerate(strides) if isinstance(s, int) and s == 1 and shape[d] > 1), None)
+    if tuple(_size(m) for m in modes) != shape:
+        raise ValueError(f"view shape {modes} does not match the layout tile {shape}")
+    unit_dim, run = None, None
+    for d, (m, st) in enumerate(zip(modes, strides)):
+        first = next(((s, t) for s, t in zip(_flat(m), _flat(st)) if s > 1), None)
+        if first is not None and isinstance(first[1], int) and first[1] == 1:
+            unit_dim, run = d, first[0]
+            break
+    if run is not None and run < shape[unit_dim]:
+        max_vec = run if max_vec is None else min(max_vec, run)
     dtype = view.element_type
     nvec, order = copy_plan(layout, unit_dim, dtype.width, max_vec)
+    # after the vector: the rest of one MMA instruction's values, then the other register
+    # bits along the smallest memory strides first, so consecutive copies touch adjacent memory
+    nb = log2(nvec)
+    atom = [i for i in order[nb:] if i < keep_bits]
+    rest = [i for i in order[nb:] if i >= keep_bits]
+    offsets = [_mem_offset(layout.reg[i], modes, strides) for i in rest]
+    if None not in offsets:
+        rest = [i for _, i in sorted(zip(offsets, rest), key=lambda t: t[0])]
+    order = order[:nb] + atom + rest
     (ts, vs), (tst, vst) = layout.tv_modes(order)
     tv = fx.make_layout((ts, vs), (tst, vst))
     atom = _copy_atom(view, nvec * dtype.width, dtype)
@@ -275,6 +331,153 @@ def _lds_view(shape, dtype, unit_dim):
     return arr.view(fx.make_layout(tuple(shape), tuple(stride)))
 
 
+# ------------------------------------------------------------- shared tiles
+class Shared:
+    """A 2D (rows, cols) LDS tile, cols contiguous, with Triton-style XOR swizzle.
+
+    Columns are grouped in chunks of ``vec`` elements; the chunk index is XORed
+    with ``(row // per_phase) % max_phase``::
+
+        offset(r, c) = r * cols + ((c // vec) ^ ((r // per_phase) % max_phase)) * vec + c % vec
+
+    ``vec=8, max_phase=8`` for bf16 rows of 128 B: the 8 lanes of one ds_read_b128
+    phase (8 rows, same chunk) and of one ds_write_b128 phase (1 row, 8 chunks)
+    hit all 32 banks.  ``max_phase=1`` = no swizzle.  ``memory`` is an LDS array
+    (``SharedAllocator`` field) with at least ``rows * cols`` elements.
+    Build it at the top of the kernel; ``slice`` gives sub-tiles that keep the
+    swizzle of the whole tile.
+    """
+
+    def __init__(self, memory, shape, vec=1, per_phase=1, max_phase=1, *, _origin=(0, 0), _views=None, _stride=None):
+        rows, cols = self.shape = tuple(shape)
+        for name, x in (("vec", vec), ("per_phase", per_phase), ("max_phase", max_phase)):
+            if x < 1 or x & (x - 1):
+                raise ValueError(f"{name}={x} must be a power of two")
+        self.vec, self.per_phase, self.max_phase = vec, per_phase, max_phase
+        self.origin = _origin
+        self.row_stride = cols if _stride is None else _stride
+        if _views is None:
+            if cols % vec:
+                raise ValueError(f"cols {cols} must be a multiple of vec {vec}")
+            # one view per vector width w <= vec: (w, vec // w, cols // vec, rows)
+            _views, w = {}, vec
+            while w >= 1:
+                _views[w] = memory.view(fx.make_ordered_layout((w, vec // w, cols // vec, rows), 0))
+                w //= 2
+        self._views = _views
+        self.element_type = _views[vec].element_type
+
+    # DSL protocol: no run-time state of its own (the views are built before any loop)
+    def __extract_to_ir_values__(self):
+        return []
+
+    @classmethod
+    def __construct_from_ir_values__(cls, values, exemplar=None):
+        return exemplar
+
+    def slice(self, start: int, length: int, dim: int = 0) -> "Shared":
+        """Static sub-tile ``[start, start + length)`` along ``dim``."""
+        shape = list(self.shape)
+        if start % length or start + length > shape[dim]:
+            raise ValueError(f"slice [{start}, {start + length}) of dim {dim} in {self.shape}")
+        shape[dim] = length
+        origin = list(self.origin)
+        origin[dim] += start
+        return Shared(
+            None,
+            shape,
+            self.vec,
+            self.per_phase,
+            self.max_phase,
+            _origin=tuple(origin),
+            _views=self._views,
+            _stride=self.row_stride,
+        )
+
+    def _chunk(self, nvec, r, c):
+        """nvec-element view at tile coordinate (r, c) (Int32, origin included)."""
+        chunk = c >> log2(self.vec)
+        if self.max_phase > 1:
+            chunk = chunk ^ ((r >> log2(self.per_phase)) & (self.max_phase - 1))
+        sub = 0 if nvec == self.vec else (c & (self.vec - 1)) >> log2(nvec)
+        return self._views[nvec][None, sub, chunk, r]
+
+
+def _concat(parts):
+    """Concatenate equal-length vectors (a power-of-two count) with shuffles."""
+    while len(parts) > 1:
+        n = parts[0].numel
+        parts = [parts[i].shuffle(parts[i + 1], list(range(2 * n))) for i in range(0, len(parts), 2)]
+    return parts[0]
+
+
+def _shared_copy(tile: Shared, layout: LinearLayout, vec=None, max_vec=None):
+    """Register <-> swizzled LDS copy, one ds_read/ds_write per vector of contiguous columns.
+
+    When a register's constant (row, col) offset has no bits in common with the
+    thread's, the address is the thread's base pointer (one per distinct XORed
+    chunk) plus a constant element offset, i.e. an immediate offset of the
+    ds_read / ds_write, as in hand-written code.  Other registers use the full
+    swizzle formula.
+    """
+    if layout.shape != tile.shape:
+        raise ValueError(f"shared tile {tile.shape} does not match the layout tile {layout.shape}")
+    if vec is not None and layout.replicated_thread_mask():
+        raise NotImplementedError("storing a replicated layout to a Shared tile")
+    cap = tile.vec if max_vec is None else min(tile.vec, max_vec)
+    nvec, order = copy_plan(layout, 1, tile.element_type.width, cap)
+    nreg = layout.num_regs
+    to_copy = [copy_index(order, r) for r in range(nreg)]  # layout reg -> copy position
+    identity = to_copy == list(range(nreg))
+    if vec is not None and not identity:
+        inv = [0] * nreg
+        for r, c in enumerate(to_copy):
+            inv[c] = r
+        vec = vec.shuffle(vec, inv)  # copy order
+
+    tr, tc = _thread_coord(layout, _tid())
+    bits_r = bits_c = 0
+    for b in layout.thread_bases:
+        bits_r, bits_c = bits_r | b[0], bits_c | b[1]
+    lv, lp, lw, pm = log2(tile.vec), log2(tile.per_phase), log2(nvec), tile.max_phase - 1
+
+    def phase(r):
+        return (r >> lp) & pm
+
+    # the thread's own swizzled chunk (and sub-chunk), and which chunk bits it can set
+    base_chunk = (tc >> lv) ^ phase(tr) if pm else tc >> lv
+    base_bits = (bits_c >> lv) | (phase(bits_r) if pm else 0)
+    base_sub = (tc & (tile.vec - 1)) >> lw if nvec < tile.vec else 0
+    bases = {}  # XORed constant chunk -> the thread's base pointer
+
+    def base_ptr(kx):
+        if kx not in bases:
+            bases[kx] = fx.get_iter(tile._views[nvec][None, base_sub, base_chunk ^ kx if kx else base_chunk, tr])
+        return bases[kx]
+
+    parts = []
+    for c0 in range(0, nreg, nvec):
+        r = sum(((c0 >> k) & 1) << i for k, i in enumerate(order))  # the atom's first register
+        rc = layout.reg_coord(r)
+        cr, cc = rc[0] + tile.origin[0], rc[1] + tile.origin[1]
+        if cr & bits_r or cc & bits_c:  # constant and thread bits overlap: full formula
+            chunk = tile._chunk(nvec, tr ^ cr, tc ^ cc)
+        else:
+            k = (cc >> lv) ^ (phase(cr) if pm else 0)
+            kx = k & base_bits  # XORed into the thread's chunk; the rest is a plain offset
+            off = cr * tile.row_stride + (k & ~base_bits) * tile.vec + ((cc & (tile.vec - 1)) >> lw) * nvec
+            ptr = base_ptr(kx)
+            chunk = fx.make_view(fx.add_offset(ptr, off) if off else ptr, fx.make_layout(nvec, 1))
+        if vec is None:
+            parts.append(fx.Vector(chunk.load()))
+        else:
+            chunk.store(vec.shuffle(vec, list(range(c0, c0 + nvec))))
+    if vec is not None:
+        return None
+    v = _concat(parts)
+    return v if identity else v.shuffle(v, to_copy)
+
+
 # ------------------------------------------------------------ the fragment
 class BlockFragment:
     """A block tile distributed over the workgroup by a LinearLayout (value semantics)."""
@@ -289,13 +492,19 @@ class BlockFragment:
         self.layout = layout
         self.mma = mma
 
-    # DSL protocol: the registers are the only run-time state.
+    # DSL protocol: the registers are the only run-time state, carried as 128-bit pieces
+    # (like hand-written per-tile vectors) rather than one wide vector.
     def __extract_to_ir_values__(self):
-        return [self.vec]
+        n = max(1, 128 // self.vec.dtype.width)
+        total = self.vec.numel
+        if total <= n or total % n:
+            return [self.vec]
+        return [self.vec.shuffle(self.vec, list(range(i, i + n))) for i in range(0, total, n)]
 
     @classmethod
     def __construct_from_ir_values__(cls, values, exemplar=None):
-        return cls(fx.Vector(values[0]), exemplar.layout, exemplar.mma)
+        parts = [fx.Vector(v) for v in values]
+        return cls(_concat(parts) if len(parts) > 1 else parts[0], exemplar.layout, exemplar.mma)
 
     def __repr__(self):
         return f"BlockFragment({self.dtype.__name__}, {self.layout.describe()})"
@@ -554,7 +763,7 @@ def _convert_lds(x: BlockFragment, dst: LinearLayout):
 
 # --------------------------------------------------------------- free API
 def load(view, layout, *, bounds=None, other=0, max_vec=None) -> BlockFragment:
-    """Load a whole tile view (global or LDS) into a BlockFragment.
+    """Load a whole tile view (global or LDS) or a ``Shared`` tile into a BlockFragment.
 
     ``bounds`` (per dim, None = full) masks atoms whose first element is out of
     range; they read ``other``.  Bounds along the vectorized dim must be a
@@ -562,14 +771,25 @@ def load(view, layout, *, bounds=None, other=0, max_vec=None) -> BlockFragment:
     """
     mma = layout if isinstance(layout, MmaSpec) else None
     lin = _layout_of(layout)
-    v = _tile_copy(view, lin, bounds=bounds, other=other, max_vec=max_vec)
+    if isinstance(view, Shared):
+        if bounds is not None:
+            raise NotImplementedError("bounds on a Shared tile")
+        return BlockFragment(_shared_copy(view, lin, max_vec=max_vec), lin, mma)
+    keep = mma.atom_bits if mma is not None else 0
+    v = _tile_copy(view, lin, bounds=bounds, other=other, max_vec=max_vec, keep_bits=keep)
     return BlockFragment(v, lin, mma)
 
 
 def store(view, x: BlockFragment, *, bounds=None, max_vec=None):
-    """Store a BlockFragment to a tile view; replicated copies are written once."""
+    """Store a BlockFragment to a tile view or a ``Shared`` tile; replicated copies are written once."""
     vec = x.vec if x.dtype is view.element_type else x.vec.to(view.element_type)
-    _tile_copy(view, x.layout, vec=vec, bounds=bounds, max_vec=max_vec, owner_only=True)
+    if isinstance(view, Shared):
+        if bounds is not None:
+            raise NotImplementedError("bounds on a Shared tile")
+        _shared_copy(view, x.layout, vec=vec, max_vec=max_vec)
+        return
+    keep = x.mma.atom_bits if x.mma is not None else 0
+    _tile_copy(view, x.layout, vec=vec, bounds=bounds, max_vec=max_vec, owner_only=True, keep_bits=keep)
 
 
 def wrap(frag, layout) -> BlockFragment:
@@ -585,8 +805,12 @@ def zeros(layout, dtype) -> BlockFragment:
     return full(layout, 0.0 if dtype.is_float else 0, dtype)
 
 
-def dot(a: BlockFragment, b: BlockFragment, acc: BlockFragment) -> BlockFragment:
-    """acc + a @ b.T with ``acc`` in an ``Mma(tm, "C", ...)`` layout; a is (M,K), b is (N,K)."""
+def dot(a: BlockFragment, b: BlockFragment, acc: BlockFragment, *, traversal_order=None) -> BlockFragment:
+    """acc + a @ b.T with ``acc`` in an ``Mma(tm, "C", ...)`` layout; a is (M,K), b is (N,K).
+
+    ``traversal_order`` (``fx.GemmTraversalOrder``, first letter = innermost loop)
+    sets the MFMA issue order, e.g. ``KNM`` = for m: for n: for k.
+    """
     if acc.mma is None or acc.mma.operand != "C":
         raise ValueError("dot needs acc created with an Mma(tiled_mma, 'C', tile) layout")
     tm = acc.mma.tiled_mma
@@ -602,5 +826,5 @@ def dot(a: BlockFragment, b: BlockFragment, acc: BlockFragment) -> BlockFragment
     fb.store(b.vec)
     fc = fx.make_rmem_tensor(acc.mma.partition_shape(), acc.dtype)
     fc.store(acc.vec)
-    fx.gemm(tm, fc, fa, fb, fc)
+    fx.gemm(tm, fc, fa, fb, fc, traversal_order=traversal_order)
     return BlockFragment(fc.load(), acc.layout, acc.mma)
