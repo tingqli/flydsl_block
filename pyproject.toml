@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flydsl-block"
+version = "0.1.0"
+description = "Block-level fragments with Triton-style layouts for FlyDSL, planned on F2 linear layouts"
+readme = "README.md"
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+# The FlyDSL layer (BlockFragment, load/store/dot) needs FlyDSL; LinearLayout planning and
+# the SVG pictures do not.  Not a hard dependency so installing never replaces the FlyDSL
+# build already in the environment.
+flydsl = ["flydsl>=0.3.4"]
+test = ["pytest"]
+
+[tool.setuptools]
+packages = ["flydsl_block"]
+include-package-data = false  # modules only: no git-tracked __pycache__ via setuptools-scm

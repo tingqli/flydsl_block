@@ -15,6 +15,20 @@ FlyDSL 上的 block 级 fragment 基本实现，对应设计文档 `pyhip/docs/f
 | `flydsl_block/fragment.py` | `BlockFragment` 和 `load/store/dot/wrap`，按规划发出 FlyDSL 操作 |
 | `flydsl_block/viz.py` | `LinearLayout.to_svg()` 用的 SVG 渲染，纯 Python |
 
+## 安装
+
+需要 Python >= 3.10。在本目录下：
+
+```bash
+pip install -e .            # 开发模式，改代码不用重装
+pip install .               # 普通安装
+pip install ".[flydsl]"     # 环境里还没有 FlyDSL 时，顺带从 PyPI 装 flydsl>=0.3.4
+pip install "git+https://github.com/tingqli/flydsl_block.git@main"  # 从github源码安装
+```
+
+- 默认不装 FlyDSL，以免覆盖环境里已有的版本（例如自己编译的）。`LinearLayout` 的规划和 SVG 可视化只用标准库，没有 FlyDSL 也能 import；`BlockFragment`、`load`、`store`、`dot` 等需要 FlyDSL。
+- 测试还需要 pytest（`pip install -e ".[test]"`）。GPU 测试需要 ROCm 版 torch，torch 不在依赖里，直接用环境里已有的。
+
 ## 用法
 
 ```python
@@ -96,9 +110,10 @@ PYTHONPATH=/tmp/flydsl050 python -m pytest tests      # FlyDSL 0.5.0
 python -m pytest tests                                 # /opt/venv 里的 FlyDSL 0.3.4.1
 ```
 
-在 gfx950 上两个版本都是 103 passed：
+在 gfx950 上两个版本都是 119 passed：
 
 - `test_linear.py`（CPU）：用 FlyDSL 实测的 TV layout 校验 `from_tv`；TV round trip；用寄存器堆模拟器逐条执行 convert / reduce 规划，覆盖 40 组随机 layout。
+- `test_viz.py`（CPU）：SVG 的两种画法、F2 矩阵，以及 lens 的分层判定（每个坐标反查出 reg/lane/warp 后再映射回来，结果应该是同一个坐标）。
 - `test_fragment_gpu.py`：带边界的 load/store（Blocked 和 `TV`）、Mma A/C、5 种 convert、3 种 layout 的 reduce（两个轴，sum/max）、softmax、运行期 K 循环的 GEMM、`wrap` 与 `.frag` 互通。结果与 torch 对比。
 - `test_isa.py`：检查最终 ISA。
   - bf16 copy：2 条 `buffer_load_dwordx4` 加 2 条 `buffer_store_dwordx4`。
