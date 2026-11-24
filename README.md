@@ -12,9 +12,9 @@ FlyDSL 上的 block 级 fragment 基本实现，对应设计文档 `pyhip/docs/f
 | 文件 | 内容 |
 |---|---|
 | `flydsl_block/linear.py` | `LinearLayout`、`blocked()`、`from_tv()`，以及 reduce / convert / copy 的规划。不依赖 FlyDSL |
-| `flydsl_block/fragment.py` | `BlockFragment` 和 `load/store/dot/wrap`，按规划发出 FlyDSL 操作 |
+| `flydsl_block/fragment.py` | `BlockFragment` 和 `load/store/copy/dot/wrap`，按规划发出 FlyDSL 操作 |
 | `flydsl_block/viz.py` | `LinearLayout.to_svg()` 用的 SVG 渲染，纯 Python |
-| `examples/` | 用 flydsl_block 改写的 gfx942-flydsl-tutorials GEMM（v0 / v0_preshuffle / v1 / v2）及对比脚本，见 [examples/README.md](examples/README.md) |
+| `examples/` | 用 flydsl_block 改写的 gfx942-flydsl-tutorials GEMM（v0 / v0_preshuffle / v1 / v2）、LDS DMA 的 v3，及对比脚本，见 [examples/README.md](examples/README.md) |
 
 ## 安装
 
@@ -59,6 +59,11 @@ frag = acc.frag                                    # block -> rmem fx.Tensor（M
 sA = blk.Shared(lds.a, (256, 64), vec=8, max_phase=8)
 blk.store(sA, blk.load(gA_k, blk.Blocked((256, 64), (1, 8), (8, 8), (4, 1))))   # global -> LDS
 a = blk.load(sA.slice(0, 32, dim=1), blk.Mma(tm, "A", (256, 32)))              # LDS -> MMA 操作数
+
+# global -> LDS 直接搬（LDS DMA，不经过寄存器），异步：每次 copy 是一个 group
+blk.copy(sA, gA_k, warps=4)
+fx.rocdl.wait_asyncmark(0)   # 本 wave 在途的 copy 最多剩 0 个
+fx.gpu.barrier()             # 其他 wave 搬的部分也到了
 ```
 
 ## 可视化
@@ -104,6 +109,7 @@ layout.to_svg("grid.svg", style="grid", highlight_thread=5)
 | layout | `Blocked(shape, size_per_thread, threads_per_warp, warps, order)`、`Mma(tiled_mma, "A"/"B"/"C", tile)`、`TV(fly_tv_layout, tile)`、`LinearLayout(shape, reg, lane, warp)` |
 | 读写 | `load(view, layout, bounds=, other=, max_vec=)`、`store(view, x, bounds=)`；`view` 可以是 global（buffer 或普通指针）、LDS 的 tile 视图，每一维可以是嵌套 mode（如预重排的 `((16, 8), (8, 4))`），或 `Shared` tile |
 | LDS tile | `Shared(memory, (rows, cols), vec, per_phase, max_phase)`：Triton 式 XOR swizzle，`chunk ^= (row // per_phase) % max_phase`；`.slice(start, length, dim)` 取子 tile（沿用整块的 swizzle） |
+| LDS DMA | `copy(shared, view, warps=)`：整块 global tile 直接写进 `Shared` tile（`buffer_load ... lds`，gfx950 每 lane 16 B，其他 4 B），不占寄存器、没有 `ds_write`；异步，每次调用是一个 group，读之前 `rocdl.wait_asyncmark(n)` + `gpu.barrier()` |
 | 运算 | `+ - * /`、`exp/exp2/maximum/minimum/to`、`sum/max/min/reduce(axis)`、`x[:, None]` 广播、`x.T` |
 | layout 转换 | `x.convert(layout, explain=True)`：寄存器改名 / warp 内 reg↔lane 交换 + lane 置换 / 经 LDS |
 | MMA | `dot(a, b, acc, traversal_order=)`：`acc` 需为 `Mma(tm, "C", ...)` layout，a/b 不匹配时自动 convert；`traversal_order`（`fx.GemmTraversalOrder`，首字母是最内层）决定 MFMA 发射顺序 |
@@ -114,6 +120,7 @@ layout.to_svg("grid.svg", style="grid", highlight_thread=5)
 - `Mma()` 的寄存器顺序与 `make_fragment_X` 一致：`(atom 的值, dim 0 的 repeat, dim 1 的 repeat)`，每一维里 permutation 产生的 tile 内 repeat 在前、tile 外的 repeat 在后，并用 `tiled_mma_partition_shape` 校验。带 K 置换（如 `(4,4,2):(1,8,4)`）或 M/N 置换的 tiled MMA 都可以用。
 - global / LDS 视图的 copy：向量之后先排一条 MMA 指令内的值，其余寄存器按内存偏移从小到大，相邻的 copy 写相邻的内存。
 - `Shared` 的地址：寄存器的常数偏移与线程部分没有公共 bit 时，地址 = 线程的基地址（每个不同的 XOR chunk 一个）+ 常数，即 `ds_read` / `ds_write` 的立即数偏移，与手写 `chunk ^ (row % 8)` 的代码相同。
+- `copy`：一条 DMA 指令把 64 个 lane 的数据写进连续的 64 个 chunk（M0 + 指令偏移 + lane × 宽度），所以由 LDS 的物理位置反推每个线程该读哪个 global 向量（XOR swizzle 自逆），一行 128 B 仍由 8 个 lane 读完。每个 wave 填一段连续的行，同一段的指令共用一个 M0，每条的 LDS 步长放进指令的 12 bit 立即数偏移（16 B chunk 时 4 条一组），global 那边的偏移相应减掉。普通指针的 tile 在 tile 起点建 buffer descriptor：换 tile 只改 SGPR 里的基地址，每线程的偏移不变（循环里不需要 VALU）。几个 copy 共用一个 descriptor 时，传同一个 buffer tile 视图的切片（见 `examples/v3.py` 的 `halves`），切片的偏移进入每线程偏移。
 - BlockFragment 作为循环变量时拆成 128 bit 的小向量。
 
 ## 测试
@@ -124,11 +131,11 @@ PYTHONPATH=/tmp/flydsl050 python -m pytest tests      # FlyDSL 0.5.0
 python -m pytest tests                                 # /opt/venv 里的 FlyDSL 0.3.4.1
 ```
 
-在 gfx950 上两个版本都是 124 passed：
+在 gfx950 上两个版本都是 140 passed：
 
 - `test_linear.py`（CPU）：用 FlyDSL 实测的 TV layout 校验 `from_tv`；TV round trip；用寄存器堆模拟器逐条执行 convert / reduce 规划，覆盖 40 组随机 layout。
 - `test_viz.py`（CPU）：SVG 的两种画法、F2 矩阵，以及 lens 的分层判定（每个坐标反查出 reg/lane/warp 后再映射回来，结果应该是同一个坐标）。
-- `test_fragment_gpu.py`：带边界的 load/store（Blocked 和 `TV`）、Mma A/C、5 种 convert、3 种 layout 的 reduce（两个轴，sum/max）、softmax、运行期 K 循环的 GEMM、`wrap` 与 `.frag` 互通、带 K / M+N 置换的 tiled MMA、嵌套（预重排）视图、`Shared` 的 swizzle（同时检查 LDS 里的实际排布）。结果与 torch 对比。
+- `test_fragment_gpu.py`：带边界的 load/store（Blocked 和 `TV`）、Mma A/C、5 种 convert、3 种 layout 的 reduce（两个轴，sum/max）、softmax、运行期 K 循环的 GEMM、`wrap` 与 `.frag` 互通、带 K / M+N 置换的 tiled MMA、嵌套（预重排）视图、`Shared` 的 swizzle（同时检查 LDS 里的实际排布）、`copy`（buffer / 普通指针，16 B / 4 B chunk，有无 swizzle，整块或两个半块，检查 LDS 排布）。结果与 torch 对比。
 - `test_isa.py`：检查最终 ISA。
   - bf16 copy：2 条 `buffer_load_dwordx4` 加 2 条 `buffer_store_dwordx4`。
   - MMA C 经 warp 内 convert 后：每对寄存器 1 条 `ds_swizzle_b32`，不占 LDS、没有 barrier，store 变成 4 条 `buffer_store_dwordx4`。
@@ -141,6 +148,7 @@ python -m pytest tests                                 # /opt/venv 里的 FlyDSL
 - lane 间搬运用 `gpu.shuffle`，LLVM 生成的是 `ds_swizzle`/`ds_bpermute`，还没有用 DPP / `v_permlane*_swap` 做 target override。
 - LDS 路径的 convert / 跨 warp reduce 没有 swizzle（不处理 bank conflict），每次都单独分配一块 LDS，并插 2~3 个 barrier。需要 swizzle 时自己建 `Shared` tile，用 `load` / `store` 搬。
 - `Shared` 只支持 2D、列连续的 tile；不支持 `bounds`，也不支持写入有副本的 layout。
+- `copy` 只写整行（不能写列切片），warp 数必须是 2 的幂，每个 warp 的行数是一条指令所填行数（64 lane × 每 lane 元素数 / 每行元素数）的倍数；没有 `bounds`（buffer 视图越界的部分按 descriptor 读成 0）。
 - 带 `bounds` 的 copy 每个 atom 单独发一次（一个 `scf.if`）。向量化维上的 bound 必须是向量宽度的倍数，否则传 `max_vec=1`。向量宽度只看连续性，默认地址已对齐。
 - 16-bit 浮点的 reduce 结果是 f32。
 - 已知 FlyDSL 问题（0.5.0 和 0.3.4.1 都有）：2x2 warp 的 tiled MMA 中，用**静态**线程号调用 `thr_slice(t).partition_B` 得到的坐标，与 `tv_layout_B_tiled` 及运行期结果不一致（M/N 两个方向的 warp 对调）。因此 `Mma()` 改用 `tv_layout_*_tiled` 构造 layout。

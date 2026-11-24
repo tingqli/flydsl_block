@@ -362,3 +362,56 @@ def test_shared_swizzle(max_phase):
     expect = torch.zeros_like(x).view(-1)
     expect[phys.reshape(-1)] = x.reshape(-1)
     assert torch.equal(raw.view(-1), expect)
+
+
+@pytest.mark.parametrize("parts", [1, 2])
+@pytest.mark.parametrize("narrow", [False, True], ids=["16B", "4B"])
+@pytest.mark.parametrize("buffer", [True, False], ids=["buffer", "global"])
+@pytest.mark.parametrize("max_phase", [1, 8])
+def test_shared_dma_copy(max_phase, buffer, narrow, parts, monkeypatch):
+    """global -> Shared by LDS DMA (the whole tile or its two row halves, a dynamic K tile), checked
+    by an MMA-layout read and the raw LDS placement.  4B: the non-gfx950 chunk width (4 lanes per
+    swizzle chunk).  One copy of the whole tile needs two M0 values per wave."""
+    rows, cols, K = 256, 64, 192
+    if narrow:
+        import flydsl_block.fragment as fragment
+
+        monkeypatch.setattr(fragment, "get_rocm_arch", lambda: "gfx942")
+
+    @fx.struct
+    class Smem:
+        a: fx.Array[fx.BFloat16, rows * cols, 16]
+
+    @flyc.kernel
+    def kern(X: fx.Tensor, Y: fx.Tensor, Raw: fx.Tensor, kt: fx.Int32):
+        lds = fx.SharedAllocator().allocate(Smem).peek()
+        s = blk.Shared(lds.a, (rows, cols), vec=8, max_phase=max_phase)
+        src = fx.rocdl.make_buffer_tensor(X, max_size=False) if buffer else X
+        g = fx.flat_divide(fx.make_view(fx.get_iter(src), fx.make_layout((rows, K), (K, 1))), (rows // parts, cols))
+        for h in fx.range_constexpr(parts):
+            blk.copy(s.slice(h * rows // parts, rows // parts), g[None, None, h, kt], warps=4)
+        fx.rocdl.wait_asyncmark(0)
+        fx.gpu.barrier()
+        tm = TILED_MMAS["mn_kperm"](fx.make_mma_atom(fx.rocdl.MFMA(16, 16, 16, fx.BFloat16)))
+        for h in fx.range_constexpr(2):
+            a = blk.load(s.slice(32 * h, 32, dim=1), blk.Mma(tm, "A", (rows, 32)))
+            blk.store(fx.flat_divide(fx.rocdl.make_buffer_tensor(Y, max_size=False), (rows, 32))[None, None, 0, h], a)
+        stage = blk.Blocked((rows, cols), (1, 8), (8, 8), (4, 1))
+        blk.store(tile2d(Raw, rows, cols), blk.load(lds.a.view(fx.make_layout((rows, cols), (cols, 1))), stage))
+
+    @flyc.jit
+    def launch(X: fx.Tensor, Y: fx.Tensor, Raw: fx.Tensor, kt: fx.Int32, stream: fx.Stream = fx.Stream(None)):
+        kern(X, Y, Raw, kt).launch(grid=(1, 1, 1), block=(THREADS, 1, 1), stream=stream)
+
+    x = torch.randn(rows, K, device="cuda").to(torch.bfloat16)
+    tile = x[:, cols : 2 * cols]
+    y, raw = torch.zeros_like(tile), torch.zeros_like(tile)
+    launch(x, y, raw, 1, stream=torch.cuda.current_stream())
+    torch.cuda.synchronize()
+    assert torch.equal(y, tile)
+    r = torch.arange(rows, device="cuda")[:, None]
+    c = torch.arange(cols, device="cuda")[None, :]
+    phys = r * cols + ((c // 8) ^ (r % max_phase)) * 8 + c % 8
+    expect = torch.zeros_like(tile).reshape(-1)
+    expect[phys.reshape(-1)] = tile.reshape(-1)
+    assert torch.equal(raw.view(-1), expect)

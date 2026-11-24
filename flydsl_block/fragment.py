@@ -12,6 +12,7 @@ import operator
 from dataclasses import dataclass
 
 import flydsl.expr as fx
+from flydsl.runtime.device import get_rocm_arch
 
 from .linear import (
     LinearLayout,
@@ -32,6 +33,7 @@ __all__ = [
     "Shared",
     "load",
     "store",
+    "copy",
     "dot",
     "wrap",
     "zeros",
@@ -401,6 +403,65 @@ class Shared:
             chunk = chunk ^ ((r >> log2(self.per_phase)) & (self.max_phase - 1))
         sub = 0 if nvec == self.vec else (c & (self.vec - 1)) >> log2(nvec)
         return self._views[nvec][None, sub, chunk, r]
+
+
+def _dma_copy(dst: Shared, src, warps: int):
+    """Global / buffer tile view -> Shared tile by LDS DMA, see ``copy``."""
+    rows, cols = dst.shape
+    if cols != dst.row_stride or dst.origin[1]:
+        raise NotImplementedError("DMA needs whole rows of the Shared tile (no column slice)")
+    if tuple(_size(m) for m in _as_tuple(src.shape.to_py_value())) != dst.shape:
+        raise ValueError(f"view shape {src.shape.to_py_value()} does not match the Shared tile {dst.shape}")
+    dtype = dst.element_type
+    # elements per lane: one chunk inside a swizzle chunk; 16 B chunks only on gfx950 (else 4 B)
+    wide = get_rocm_arch().startswith("gfx95")
+    nvec = min(dst.vec, (128 if wide else 32) // dtype.width)
+    bits = nvec * dtype.width
+    ws = _warp_size()
+    cpr = cols // nvec  # chunks per row
+    lane_rows = ws // cpr  # rows one instruction fills
+    if bits not in (32, 128) or warps & (warps - 1) or ws % cpr or rows % (warps * lane_rows):
+        raise NotImplementedError(f"DMA of a {dst.shape} tile with {bits}-bit chunks over {warps} warps")
+    wave_rows = rows // warps  # each wave fills its own block of rows
+    step = ws * bits // 8  # LDS bytes per instruction
+    group = 4096 // step  # instructions sharing one M0: the rest of the LDS step is the 12-bit offset
+    lv, lp, pm = log2(dst.vec), log2(dst.per_phase), dst.max_phase - 1
+    lsub = log2(dst.vec // nvec)
+
+    def phase(r):
+        return (r >> lp) & pm
+
+    # this thread's chunk in the first instruction: (row, physical chunk); the global vector to
+    # fetch is the one the swizzle puts there (XOR is its own inverse)
+    tid = _tid()
+    lane, wave = tid & (ws - 1), tid >> log2(ws)
+    row_t = wave * wave_rows + (lane >> log2(cpr))
+    thread_rows = (lane_rows - 1) | ((warps - 1) * wave_rows)  # row bits that come from the thread
+    pc = lane & (cpr - 1)
+    chunk_t, sub_t = pc >> lsub, pc & ((1 << lsub) - 1)
+    # LDS: a wave-uniform base (M0); the hardware adds the instruction offset and lane * chunk
+    m0 = fx.Int32(fx.rocdl.readfirstlane(fx.Int32.ir_type, wave * (wave_rows * cols)))
+    lds = fx.add_offset(fx.get_iter(dst._views[dst.vec]), m0)
+    # global: a buffer descriptor based at the tile, so only the base changes from tile to tile
+    # (SGPRs) and the per-thread offsets stay the same; a buffer view is used as it is
+    gsrc = fx.get_iter(src)
+    if "buffer_desc" not in str(src.address_space):
+        gsrc = fx.rocdl.make_buffer_ptr(gsrc)
+    atom = fx.make_copy_atom(fx.rocdl.cdna4.BufferLoadAsyncLDS(bits), dtype)
+    for j in range(wave_rows // lane_rows):
+        r0 = dst.origin[0] + j * lane_rows  # parent row added to this thread's row
+        if r0 & thread_rows == 0:  # disjoint row bits: split the phase
+            chunk = chunk_t ^ phase(row_t) ^ phase(r0) if pm else chunk_t
+        else:
+            chunk = chunk_t ^ phase(row_t + r0)
+        col = (chunk << lv) + (sub_t * nvec if lsub else 0)
+        # the instruction offset moves both addresses: take it off the global one
+        imm = j % group * step
+        off = fx.get_scalar(fx.crd2idx((row_t + j * lane_rows, col), src.layout))
+        s = fx.make_view(fx.add_offset(gsrc, off - imm * 8 // dtype.width), fx.make_layout(nvec, 1))
+        d = fx.make_view(fx.add_offset(lds, (r0 - j % group * lane_rows) * cols), fx.make_layout(nvec, 1))
+        fx.copy_atom_call(atom.set_value("imm_offset", fx.Int32(imm)) if imm else atom, s, d)
+    fx.rocdl.asyncmark()
 
 
 def _concat(parts):
@@ -790,6 +851,20 @@ def store(view, x: BlockFragment, *, bounds=None, max_vec=None):
         return
     keep = x.mma.atom_bits if x.mma is not None else 0
     _tile_copy(view, x.layout, vec=vec, bounds=bounds, max_vec=max_vec, owner_only=True, keep_bits=keep)
+
+
+def copy(dst: Shared, src, *, warps: int):
+    """Copy a whole global (or buffer) tile view into a ``Shared`` tile with LDS DMA
+    (``buffer_load ... lds``, gfx950), without registers.
+
+    Each instruction writes 64 consecutive 16 B chunks of LDS, lane i at chunk i
+    (``warps`` waves cover consecutive rows, round after round), so each thread
+    fetches the global vector the swizzle places at its chunk; the 8 lanes of a
+    128 B row still read that whole row.  Asynchronous: each call is one group.
+    Before reading the tile, ``rocdl.wait_asyncmark(n)`` (at most ``n`` later
+    copies still in flight) and ``gpu.barrier()`` (the other waves' chunks).
+    """
+    _dma_copy(dst, src, warps)
 
 
 def wrap(frag, layout) -> BlockFragment:
