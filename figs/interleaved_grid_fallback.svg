@@ -1,0 +1,1018 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="762" viewBox="0 0 760 762">
+<style>text{font-family:DejaVu Sans Mono,Menlo,Consolas,monospace;font-size:11px}.c{text-anchor:middle;font-size:9px}.r{text-anchor:middle;font-size:8px;fill:#333}.ax{font-size:9px;fill:#666;paint-order:stroke;stroke:#fff;stroke-width:3px}.k{fill:#444}.lc{text-anchor:middle;font-size:11px}.ls{text-anchor:middle;font-size:9px;fill:#333}.pt{font-size:12px;font-weight:bold}.mh{font-size:12px;text-anchor:middle}.ml{font-size:13px;font-style:italic}.ma{font-size:15px}.m1{font-size:12px;text-anchor:middle;font-weight:bold}.m0{font-size:12px;text-anchor:middle;fill:#9a9a9a}</style>
+<rect width="760" height="762" fill="white"/>
+<text x="14" y="26" style="font-size:16px;font-weight:bold">interleaved_grid_fallback</text>
+<text class="k" x="14" y="48" xml:space="preserve">block = one thread: T&lt;thread&gt; once, r&lt;register&gt; per element [xN = N copies]</text>
+<text class="k" x="14" y="62" xml:space="preserve">      colour = lane (hue = lane%16, shade = lane/16)  thick line = warp boundary  black outline = thread 0</text>
+<text class="ax" x="61.0" y="86" text-anchor="middle">0</text>
+<text class="ax" x="95.0" y="86" text-anchor="middle">1</text>
+<text class="ax" x="129.0" y="86" text-anchor="middle">2</text>
+<text class="ax" x="163.0" y="86" text-anchor="middle">3</text>
+<text class="ax" x="197.0" y="86" text-anchor="middle">4</text>
+<text class="ax" x="231.0" y="86" text-anchor="middle">5</text>
+<text class="ax" x="265.0" y="86" text-anchor="middle">6</text>
+<text class="ax" x="299.0" y="86" text-anchor="middle">7</text>
+<text class="ax" x="333.0" y="86" text-anchor="middle">8</text>
+<text class="ax" x="367.0" y="86" text-anchor="middle">9</text>
+<text class="ax" x="401.0" y="86" text-anchor="middle">10</text>
+<text class="ax" x="435.0" y="86" text-anchor="middle">11</text>
+<text class="ax" x="469.0" y="86" text-anchor="middle">12</text>
+<text class="ax" x="503.0" y="86" text-anchor="middle">13</text>
+<text class="ax" x="537.0" y="86" text-anchor="middle">14</text>
+<text class="ax" x="571.0" y="86" text-anchor="middle">15</text>
+<text class="ax" x="39" y="106.0" text-anchor="end">0</text>
+<text class="ax" x="39" y="128.0" text-anchor="end">1</text>
+<text class="ax" x="39" y="150.0" text-anchor="end">2</text>
+<text class="ax" x="39" y="172.0" text-anchor="end">3</text>
+<text class="ax" x="39" y="194.0" text-anchor="end">4</text>
+<text class="ax" x="39" y="216.0" text-anchor="end">5</text>
+<text class="ax" x="39" y="238.0" text-anchor="end">6</text>
+<text class="ax" x="39" y="260.0" text-anchor="end">7</text>
+<text class="ax" x="39" y="282.0" text-anchor="end">8</text>
+<text class="ax" x="39" y="304.0" text-anchor="end">9</text>
+<text class="ax" x="39" y="326.0" text-anchor="end">10</text>
+<text class="ax" x="39" y="348.0" text-anchor="end">11</text>
+<text class="ax" x="39" y="370.0" text-anchor="end">12</text>
+<text class="ax" x="39" y="392.0" text-anchor="end">13</text>
+<text class="ax" x="39" y="414.0" text-anchor="end">14</text>
+<text class="ax" x="39" y="436.0" text-anchor="end">15</text>
+<text class="ax" x="14" y="86">m\n</text>
+<rect x="44" y="92" width="34" height="22" fill="#f1c5c5"/>
+<text class="c" x="61.0" y="102.0">T0</text>
+<text class="r" x="61.0" y="111.0">r0</text>
+<rect x="78" y="92" width="34" height="22" fill="#f1d6c5"/>
+<text class="c" x="95.0" y="102.0">T1</text>
+<text class="r" x="95.0" y="111.0">r0</text>
+<rect x="112" y="92" width="34" height="22" fill="#f1c5c5"/>
+<text class="c" x="129.0" y="102.0">T0</text>
+<text class="r" x="129.0" y="111.0">r1</text>
+<rect x="146" y="92" width="34" height="22" fill="#f1d6c5"/>
+<text class="c" x="163.0" y="102.0">T1</text>
+<text class="r" x="163.0" y="111.0">r1</text>
+<rect x="180" y="92" width="34" height="22" fill="#f1e6c5"/>
+<text class="c" x="197.0" y="102.0">T2</text>
+<text class="r" x="197.0" y="111.0">r0</text>
+<rect x="214" y="92" width="34" height="22" fill="#ecf1c5"/>
+<text class="c" x="231.0" y="102.0">T3</text>
+<text class="r" x="231.0" y="111.0">r0</text>
+<rect x="248" y="92" width="34" height="22" fill="#f1e6c5"/>
+<text class="c" x="265.0" y="102.0">T2</text>
+<text class="r" x="265.0" y="111.0">r1</text>
+<rect x="282" y="92" width="34" height="22" fill="#ecf1c5"/>
+<text class="c" x="299.0" y="102.0">T3</text>
+<text class="r" x="299.0" y="111.0">r1</text>
+<rect x="316" y="92" width="34" height="22" fill="#dbf1c5"/>
+<text class="c" x="333.0" y="102.0">T4</text>
+<text class="r" x="333.0" y="111.0">r0</text>
+<rect x="350" y="92" width="34" height="22" fill="#cbf1c5"/>
+<text class="c" x="367.0" y="102.0">T5</text>
+<text class="r" x="367.0" y="111.0">r0</text>
+<rect x="384" y="92" width="34" height="22" fill="#dbf1c5"/>
+<text class="c" x="401.0" y="102.0">T4</text>
+<text class="r" x="401.0" y="111.0">r1</text>
+<rect x="418" y="92" width="34" height="22" fill="#cbf1c5"/>
+<text class="c" x="435.0" y="102.0">T5</text>
+<text class="r" x="435.0" y="111.0">r1</text>
+<rect x="452" y="92" width="34" height="22" fill="#c5f1d0"/>
+<text class="c" x="469.0" y="102.0">T6</text>
+<text class="r" x="469.0" y="111.0">r0</text>
+<rect x="486" y="92" width="34" height="22" fill="#c5f1e1"/>
+<text class="c" x="503.0" y="102.0">T7</text>
+<text class="r" x="503.0" y="111.0">r0</text>
+<rect x="520" y="92" width="34" height="22" fill="#c5f1d0"/>
+<text class="c" x="537.0" y="102.0">T6</text>
+<text class="r" x="537.0" y="111.0">r1</text>
+<rect x="554" y="92" width="34" height="22" fill="#c5f1e1"/>
+<text class="c" x="571.0" y="102.0">T7</text>
+<text class="r" x="571.0" y="111.0">r1</text>
+<rect x="44" y="114" width="34" height="22" fill="#c5f1f1"/>
+<text class="c" x="61.0" y="124.0">T8</text>
+<text class="r" x="61.0" y="133.0">r0</text>
+<rect x="78" y="114" width="34" height="22" fill="#c5e1f1"/>
+<text class="c" x="95.0" y="124.0">T9</text>
+<text class="r" x="95.0" y="133.0">r0</text>
+<rect x="112" y="114" width="34" height="22" fill="#c5f1f1"/>
+<text class="c" x="129.0" y="124.0">T8</text>
+<text class="r" x="129.0" y="133.0">r1</text>
+<rect x="146" y="114" width="34" height="22" fill="#c5e1f1"/>
+<text class="c" x="163.0" y="124.0">T9</text>
+<text class="r" x="163.0" y="133.0">r1</text>
+<rect x="180" y="114" width="34" height="22" fill="#c5d0f1"/>
+<text class="c" x="197.0" y="124.0">T10</text>
+<text class="r" x="197.0" y="133.0">r0</text>
+<rect x="214" y="114" width="34" height="22" fill="#cbc5f1"/>
+<text class="c" x="231.0" y="124.0">T11</text>
+<text class="r" x="231.0" y="133.0">r0</text>
+<rect x="248" y="114" width="34" height="22" fill="#c5d0f1"/>
+<text class="c" x="265.0" y="124.0">T10</text>
+<text class="r" x="265.0" y="133.0">r1</text>
+<rect x="282" y="114" width="34" height="22" fill="#cbc5f1"/>
+<text class="c" x="299.0" y="124.0">T11</text>
+<text class="r" x="299.0" y="133.0">r1</text>
+<rect x="316" y="114" width="34" height="22" fill="#dbc5f1"/>
+<text class="c" x="333.0" y="124.0">T12</text>
+<text class="r" x="333.0" y="133.0">r0</text>
+<rect x="350" y="114" width="34" height="22" fill="#ecc5f1"/>
+<text class="c" x="367.0" y="124.0">T13</text>
+<text class="r" x="367.0" y="133.0">r0</text>
+<rect x="384" y="114" width="34" height="22" fill="#dbc5f1"/>
+<text class="c" x="401.0" y="124.0">T12</text>
+<text class="r" x="401.0" y="133.0">r1</text>
+<rect x="418" y="114" width="34" height="22" fill="#ecc5f1"/>
+<text class="c" x="435.0" y="124.0">T13</text>
+<text class="r" x="435.0" y="133.0">r1</text>
+<rect x="452" y="114" width="34" height="22" fill="#f1c5e6"/>
+<text class="c" x="469.0" y="124.0">T14</text>
+<text class="r" x="469.0" y="133.0">r0</text>
+<rect x="486" y="114" width="34" height="22" fill="#f1c5d6"/>
+<text class="c" x="503.0" y="124.0">T15</text>
+<text class="r" x="503.0" y="133.0">r0</text>
+<rect x="520" y="114" width="34" height="22" fill="#f1c5e6"/>
+<text class="c" x="537.0" y="124.0">T14</text>
+<text class="r" x="537.0" y="133.0">r1</text>
+<rect x="554" y="114" width="34" height="22" fill="#f1c5d6"/>
+<text class="c" x="571.0" y="124.0">T15</text>
+<text class="r" x="571.0" y="133.0">r1</text>
+<rect x="44" y="136" width="34" height="22" fill="#e9a0a0"/>
+<text class="c" x="61.0" y="146.0">T16</text>
+<text class="r" x="61.0" y="155.0">r0</text>
+<rect x="78" y="136" width="34" height="22" fill="#e9bba0"/>
+<text class="c" x="95.0" y="146.0">T17</text>
+<text class="r" x="95.0" y="155.0">r0</text>
+<rect x="112" y="136" width="34" height="22" fill="#e9a0a0"/>
+<text class="c" x="129.0" y="146.0">T16</text>
+<text class="r" x="129.0" y="155.0">r1</text>
+<rect x="146" y="136" width="34" height="22" fill="#e9bba0"/>
+<text class="c" x="163.0" y="146.0">T17</text>
+<text class="r" x="163.0" y="155.0">r1</text>
+<rect x="180" y="136" width="34" height="22" fill="#e9d7a0"/>
+<text class="c" x="197.0" y="146.0">T18</text>
+<text class="r" x="197.0" y="155.0">r0</text>
+<rect x="214" y="136" width="34" height="22" fill="#e0e9a0"/>
+<text class="c" x="231.0" y="146.0">T19</text>
+<text class="r" x="231.0" y="155.0">r0</text>
+<rect x="248" y="136" width="34" height="22" fill="#e9d7a0"/>
+<text class="c" x="265.0" y="146.0">T18</text>
+<text class="r" x="265.0" y="155.0">r1</text>
+<rect x="282" y="136" width="34" height="22" fill="#e0e9a0"/>
+<text class="c" x="299.0" y="146.0">T19</text>
+<text class="r" x="299.0" y="155.0">r1</text>
+<rect x="316" y="136" width="34" height="22" fill="#c4e9a0"/>
+<text class="c" x="333.0" y="146.0">T20</text>
+<text class="r" x="333.0" y="155.0">r0</text>
+<rect x="350" y="136" width="34" height="22" fill="#a9e9a0"/>
+<text class="c" x="367.0" y="146.0">T21</text>
+<text class="r" x="367.0" y="155.0">r0</text>
+<rect x="384" y="136" width="34" height="22" fill="#c4e9a0"/>
+<text class="c" x="401.0" y="146.0">T20</text>
+<text class="r" x="401.0" y="155.0">r1</text>
+<rect x="418" y="136" width="34" height="22" fill="#a9e9a0"/>
+<text class="c" x="435.0" y="146.0">T21</text>
+<text class="r" x="435.0" y="155.0">r1</text>
+<rect x="452" y="136" width="34" height="22" fill="#a0e9b2"/>
+<text class="c" x="469.0" y="146.0">T22</text>
+<text class="r" x="469.0" y="155.0">r0</text>
+<rect x="486" y="136" width="34" height="22" fill="#a0e9cd"/>
+<text class="c" x="503.0" y="146.0">T23</text>
+<text class="r" x="503.0" y="155.0">r0</text>
+<rect x="520" y="136" width="34" height="22" fill="#a0e9b2"/>
+<text class="c" x="537.0" y="146.0">T22</text>
+<text class="r" x="537.0" y="155.0">r1</text>
+<rect x="554" y="136" width="34" height="22" fill="#a0e9cd"/>
+<text class="c" x="571.0" y="146.0">T23</text>
+<text class="r" x="571.0" y="155.0">r1</text>
+<rect x="44" y="158" width="34" height="22" fill="#a0e9e9"/>
+<text class="c" x="61.0" y="168.0">T24</text>
+<text class="r" x="61.0" y="177.0">r0</text>
+<rect x="78" y="158" width="34" height="22" fill="#a0cde9"/>
+<text class="c" x="95.0" y="168.0">T25</text>
+<text class="r" x="95.0" y="177.0">r0</text>
+<rect x="112" y="158" width="34" height="22" fill="#a0e9e9"/>
+<text class="c" x="129.0" y="168.0">T24</text>
+<text class="r" x="129.0" y="177.0">r1</text>
+<rect x="146" y="158" width="34" height="22" fill="#a0cde9"/>
+<text class="c" x="163.0" y="168.0">T25</text>
+<text class="r" x="163.0" y="177.0">r1</text>
+<rect x="180" y="158" width="34" height="22" fill="#a0b2e9"/>
+<text class="c" x="197.0" y="168.0">T26</text>
+<text class="r" x="197.0" y="177.0">r0</text>
+<rect x="214" y="158" width="34" height="22" fill="#a9a0e9"/>
+<text class="c" x="231.0" y="168.0">T27</text>
+<text class="r" x="231.0" y="177.0">r0</text>
+<rect x="248" y="158" width="34" height="22" fill="#a0b2e9"/>
+<text class="c" x="265.0" y="168.0">T26</text>
+<text class="r" x="265.0" y="177.0">r1</text>
+<rect x="282" y="158" width="34" height="22" fill="#a9a0e9"/>
+<text class="c" x="299.0" y="168.0">T27</text>
+<text class="r" x="299.0" y="177.0">r1</text>
+<rect x="316" y="158" width="34" height="22" fill="#c4a0e9"/>
+<text class="c" x="333.0" y="168.0">T28</text>
+<text class="r" x="333.0" y="177.0">r0</text>
+<rect x="350" y="158" width="34" height="22" fill="#e0a0e9"/>
+<text class="c" x="367.0" y="168.0">T29</text>
+<text class="r" x="367.0" y="177.0">r0</text>
+<rect x="384" y="158" width="34" height="22" fill="#c4a0e9"/>
+<text class="c" x="401.0" y="168.0">T28</text>
+<text class="r" x="401.0" y="177.0">r1</text>
+<rect x="418" y="158" width="34" height="22" fill="#e0a0e9"/>
+<text class="c" x="435.0" y="168.0">T29</text>
+<text class="r" x="435.0" y="177.0">r1</text>
+<rect x="452" y="158" width="34" height="22" fill="#e9a0d7"/>
+<text class="c" x="469.0" y="168.0">T30</text>
+<text class="r" x="469.0" y="177.0">r0</text>
+<rect x="486" y="158" width="34" height="22" fill="#e9a0bb"/>
+<text class="c" x="503.0" y="168.0">T31</text>
+<text class="r" x="503.0" y="177.0">r0</text>
+<rect x="520" y="158" width="34" height="22" fill="#e9a0d7"/>
+<text class="c" x="537.0" y="168.0">T30</text>
+<text class="r" x="537.0" y="177.0">r1</text>
+<rect x="554" y="158" width="34" height="22" fill="#e9a0bb"/>
+<text class="c" x="571.0" y="168.0">T31</text>
+<text class="r" x="571.0" y="177.0">r1</text>
+<rect x="44" y="180" width="34" height="22" fill="#e07b7b"/>
+<text class="c" x="61.0" y="190.0">T32</text>
+<text class="r" x="61.0" y="199.0">r0</text>
+<rect x="78" y="180" width="34" height="22" fill="#e0a17b"/>
+<text class="c" x="95.0" y="190.0">T33</text>
+<text class="r" x="95.0" y="199.0">r0</text>
+<rect x="112" y="180" width="34" height="22" fill="#e07b7b"/>
+<text class="c" x="129.0" y="190.0">T32</text>
+<text class="r" x="129.0" y="199.0">r1</text>
+<rect x="146" y="180" width="34" height="22" fill="#e0a17b"/>
+<text class="c" x="163.0" y="190.0">T33</text>
+<text class="r" x="163.0" y="199.0">r1</text>
+<rect x="180" y="180" width="34" height="22" fill="#e0c77b"/>
+<text class="c" x="197.0" y="190.0">T34</text>
+<text class="r" x="197.0" y="199.0">r0</text>
+<rect x="214" y="180" width="34" height="22" fill="#d3e07b"/>
+<text class="c" x="231.0" y="190.0">T35</text>
+<text class="r" x="231.0" y="199.0">r0</text>
+<rect x="248" y="180" width="34" height="22" fill="#e0c77b"/>
+<text class="c" x="265.0" y="190.0">T34</text>
+<text class="r" x="265.0" y="199.0">r1</text>
+<rect x="282" y="180" width="34" height="22" fill="#d3e07b"/>
+<text class="c" x="299.0" y="190.0">T35</text>
+<text class="r" x="299.0" y="199.0">r1</text>
+<rect x="316" y="180" width="34" height="22" fill="#ade07b"/>
+<text class="c" x="333.0" y="190.0">T36</text>
+<text class="r" x="333.0" y="199.0">r0</text>
+<rect x="350" y="180" width="34" height="22" fill="#87e07b"/>
+<text class="c" x="367.0" y="190.0">T37</text>
+<text class="r" x="367.0" y="199.0">r0</text>
+<rect x="384" y="180" width="34" height="22" fill="#ade07b"/>
+<text class="c" x="401.0" y="190.0">T36</text>
+<text class="r" x="401.0" y="199.0">r1</text>
+<rect x="418" y="180" width="34" height="22" fill="#87e07b"/>
+<text class="c" x="435.0" y="190.0">T37</text>
+<text class="r" x="435.0" y="199.0">r1</text>
+<rect x="452" y="180" width="34" height="22" fill="#7be094"/>
+<text class="c" x="469.0" y="190.0">T38</text>
+<text class="r" x="469.0" y="199.0">r0</text>
+<rect x="486" y="180" width="34" height="22" fill="#7be0ba"/>
+<text class="c" x="503.0" y="190.0">T39</text>
+<text class="r" x="503.0" y="199.0">r0</text>
+<rect x="520" y="180" width="34" height="22" fill="#7be094"/>
+<text class="c" x="537.0" y="190.0">T38</text>
+<text class="r" x="537.0" y="199.0">r1</text>
+<rect x="554" y="180" width="34" height="22" fill="#7be0ba"/>
+<text class="c" x="571.0" y="190.0">T39</text>
+<text class="r" x="571.0" y="199.0">r1</text>
+<rect x="44" y="202" width="34" height="22" fill="#7be0e0"/>
+<text class="c" x="61.0" y="212.0">T40</text>
+<text class="r" x="61.0" y="221.0">r0</text>
+<rect x="78" y="202" width="34" height="22" fill="#7bbae0"/>
+<text class="c" x="95.0" y="212.0">T41</text>
+<text class="r" x="95.0" y="221.0">r0</text>
+<rect x="112" y="202" width="34" height="22" fill="#7be0e0"/>
+<text class="c" x="129.0" y="212.0">T40</text>
+<text class="r" x="129.0" y="221.0">r1</text>
+<rect x="146" y="202" width="34" height="22" fill="#7bbae0"/>
+<text class="c" x="163.0" y="212.0">T41</text>
+<text class="r" x="163.0" y="221.0">r1</text>
+<rect x="180" y="202" width="34" height="22" fill="#7b94e0"/>
+<text class="c" x="197.0" y="212.0">T42</text>
+<text class="r" x="197.0" y="221.0">r0</text>
+<rect x="214" y="202" width="34" height="22" fill="#877be0"/>
+<text class="c" x="231.0" y="212.0">T43</text>
+<text class="r" x="231.0" y="221.0">r0</text>
+<rect x="248" y="202" width="34" height="22" fill="#7b94e0"/>
+<text class="c" x="265.0" y="212.0">T42</text>
+<text class="r" x="265.0" y="221.0">r1</text>
+<rect x="282" y="202" width="34" height="22" fill="#877be0"/>
+<text class="c" x="299.0" y="212.0">T43</text>
+<text class="r" x="299.0" y="221.0">r1</text>
+<rect x="316" y="202" width="34" height="22" fill="#ad7be0"/>
+<text class="c" x="333.0" y="212.0">T44</text>
+<text class="r" x="333.0" y="221.0">r0</text>
+<rect x="350" y="202" width="34" height="22" fill="#d37be0"/>
+<text class="c" x="367.0" y="212.0">T45</text>
+<text class="r" x="367.0" y="221.0">r0</text>
+<rect x="384" y="202" width="34" height="22" fill="#ad7be0"/>
+<text class="c" x="401.0" y="212.0">T44</text>
+<text class="r" x="401.0" y="221.0">r1</text>
+<rect x="418" y="202" width="34" height="22" fill="#d37be0"/>
+<text class="c" x="435.0" y="212.0">T45</text>
+<text class="r" x="435.0" y="221.0">r1</text>
+<rect x="452" y="202" width="34" height="22" fill="#e07bc7"/>
+<text class="c" x="469.0" y="212.0">T46</text>
+<text class="r" x="469.0" y="221.0">r0</text>
+<rect x="486" y="202" width="34" height="22" fill="#e07ba1"/>
+<text class="c" x="503.0" y="212.0">T47</text>
+<text class="r" x="503.0" y="221.0">r0</text>
+<rect x="520" y="202" width="34" height="22" fill="#e07bc7"/>
+<text class="c" x="537.0" y="212.0">T46</text>
+<text class="r" x="537.0" y="221.0">r1</text>
+<rect x="554" y="202" width="34" height="22" fill="#e07ba1"/>
+<text class="c" x="571.0" y="212.0">T47</text>
+<text class="r" x="571.0" y="221.0">r1</text>
+<rect x="44" y="224" width="34" height="22" fill="#d75656"/>
+<text class="c" x="61.0" y="234.0">T48</text>
+<text class="r" x="61.0" y="243.0">r0</text>
+<rect x="78" y="224" width="34" height="22" fill="#d78656"/>
+<text class="c" x="95.0" y="234.0">T49</text>
+<text class="r" x="95.0" y="243.0">r0</text>
+<rect x="112" y="224" width="34" height="22" fill="#d75656"/>
+<text class="c" x="129.0" y="234.0">T48</text>
+<text class="r" x="129.0" y="243.0">r1</text>
+<rect x="146" y="224" width="34" height="22" fill="#d78656"/>
+<text class="c" x="163.0" y="234.0">T49</text>
+<text class="r" x="163.0" y="243.0">r1</text>
+<rect x="180" y="224" width="34" height="22" fill="#d7b756"/>
+<text class="c" x="197.0" y="234.0">T50</text>
+<text class="r" x="197.0" y="243.0">r0</text>
+<rect x="214" y="224" width="34" height="22" fill="#c7d756"/>
+<text class="c" x="231.0" y="234.0">T51</text>
+<text class="r" x="231.0" y="243.0">r0</text>
+<rect x="248" y="224" width="34" height="22" fill="#d7b756"/>
+<text class="c" x="265.0" y="234.0">T50</text>
+<text class="r" x="265.0" y="243.0">r1</text>
+<rect x="282" y="224" width="34" height="22" fill="#c7d756"/>
+<text class="c" x="299.0" y="234.0">T51</text>
+<text class="r" x="299.0" y="243.0">r1</text>
+<rect x="316" y="224" width="34" height="22" fill="#96d756"/>
+<text class="c" x="333.0" y="234.0">T52</text>
+<text class="r" x="333.0" y="243.0">r0</text>
+<rect x="350" y="224" width="34" height="22" fill="#66d756"/>
+<text class="c" x="367.0" y="234.0">T53</text>
+<text class="r" x="367.0" y="243.0">r0</text>
+<rect x="384" y="224" width="34" height="22" fill="#96d756"/>
+<text class="c" x="401.0" y="234.0">T52</text>
+<text class="r" x="401.0" y="243.0">r1</text>
+<rect x="418" y="224" width="34" height="22" fill="#66d756"/>
+<text class="c" x="435.0" y="234.0">T53</text>
+<text class="r" x="435.0" y="243.0">r1</text>
+<rect x="452" y="224" width="34" height="22" fill="#56d776"/>
+<text class="c" x="469.0" y="234.0">T54</text>
+<text class="r" x="469.0" y="243.0">r0</text>
+<rect x="486" y="224" width="34" height="22" fill="#56d7a7"/>
+<text class="c" x="503.0" y="234.0">T55</text>
+<text class="r" x="503.0" y="243.0">r0</text>
+<rect x="520" y="224" width="34" height="22" fill="#56d776"/>
+<text class="c" x="537.0" y="234.0">T54</text>
+<text class="r" x="537.0" y="243.0">r1</text>
+<rect x="554" y="224" width="34" height="22" fill="#56d7a7"/>
+<text class="c" x="571.0" y="234.0">T55</text>
+<text class="r" x="571.0" y="243.0">r1</text>
+<rect x="44" y="246" width="34" height="22" fill="#56d7d7"/>
+<text class="c" x="61.0" y="256.0">T56</text>
+<text class="r" x="61.0" y="265.0">r0</text>
+<rect x="78" y="246" width="34" height="22" fill="#56a7d7"/>
+<text class="c" x="95.0" y="256.0">T57</text>
+<text class="r" x="95.0" y="265.0">r0</text>
+<rect x="112" y="246" width="34" height="22" fill="#56d7d7"/>
+<text class="c" x="129.0" y="256.0">T56</text>
+<text class="r" x="129.0" y="265.0">r1</text>
+<rect x="146" y="246" width="34" height="22" fill="#56a7d7"/>
+<text class="c" x="163.0" y="256.0">T57</text>
+<text class="r" x="163.0" y="265.0">r1</text>
+<rect x="180" y="246" width="34" height="22" fill="#5676d7"/>
+<text class="c" x="197.0" y="256.0">T58</text>
+<text class="r" x="197.0" y="265.0">r0</text>
+<rect x="214" y="246" width="34" height="22" fill="#6656d7"/>
+<text class="c" x="231.0" y="256.0">T59</text>
+<text class="r" x="231.0" y="265.0">r0</text>
+<rect x="248" y="246" width="34" height="22" fill="#5676d7"/>
+<text class="c" x="265.0" y="256.0">T58</text>
+<text class="r" x="265.0" y="265.0">r1</text>
+<rect x="282" y="246" width="34" height="22" fill="#6656d7"/>
+<text class="c" x="299.0" y="256.0">T59</text>
+<text class="r" x="299.0" y="265.0">r1</text>
+<rect x="316" y="246" width="34" height="22" fill="#9656d7"/>
+<text class="c" x="333.0" y="256.0">T60</text>
+<text class="r" x="333.0" y="265.0">r0</text>
+<rect x="350" y="246" width="34" height="22" fill="#c756d7"/>
+<text class="c" x="367.0" y="256.0">T61</text>
+<text class="r" x="367.0" y="265.0">r0</text>
+<rect x="384" y="246" width="34" height="22" fill="#9656d7"/>
+<text class="c" x="401.0" y="256.0">T60</text>
+<text class="r" x="401.0" y="265.0">r1</text>
+<rect x="418" y="246" width="34" height="22" fill="#c756d7"/>
+<text class="c" x="435.0" y="256.0">T61</text>
+<text class="r" x="435.0" y="265.0">r1</text>
+<rect x="452" y="246" width="34" height="22" fill="#d756b7"/>
+<text class="c" x="469.0" y="256.0">T62</text>
+<text class="r" x="469.0" y="265.0">r0</text>
+<rect x="486" y="246" width="34" height="22" fill="#d75686"/>
+<text class="c" x="503.0" y="256.0">T63</text>
+<text class="r" x="503.0" y="265.0">r0</text>
+<rect x="520" y="246" width="34" height="22" fill="#d756b7"/>
+<text class="c" x="537.0" y="256.0">T62</text>
+<text class="r" x="537.0" y="265.0">r1</text>
+<rect x="554" y="246" width="34" height="22" fill="#d75686"/>
+<text class="c" x="571.0" y="256.0">T63</text>
+<text class="r" x="571.0" y="265.0">r1</text>
+<rect x="44" y="268" width="34" height="22" fill="#f1c5c5"/>
+<text class="c" x="61.0" y="278.0">T64</text>
+<text class="r" x="61.0" y="287.0">r0</text>
+<rect x="78" y="268" width="34" height="22" fill="#f1d6c5"/>
+<text class="c" x="95.0" y="278.0">T65</text>
+<text class="r" x="95.0" y="287.0">r0</text>
+<rect x="112" y="268" width="34" height="22" fill="#f1c5c5"/>
+<text class="c" x="129.0" y="278.0">T64</text>
+<text class="r" x="129.0" y="287.0">r1</text>
+<rect x="146" y="268" width="34" height="22" fill="#f1d6c5"/>
+<text class="c" x="163.0" y="278.0">T65</text>
+<text class="r" x="163.0" y="287.0">r1</text>
+<rect x="180" y="268" width="34" height="22" fill="#f1e6c5"/>
+<text class="c" x="197.0" y="278.0">T66</text>
+<text class="r" x="197.0" y="287.0">r0</text>
+<rect x="214" y="268" width="34" height="22" fill="#ecf1c5"/>
+<text class="c" x="231.0" y="278.0">T67</text>
+<text class="r" x="231.0" y="287.0">r0</text>
+<rect x="248" y="268" width="34" height="22" fill="#f1e6c5"/>
+<text class="c" x="265.0" y="278.0">T66</text>
+<text class="r" x="265.0" y="287.0">r1</text>
+<rect x="282" y="268" width="34" height="22" fill="#ecf1c5"/>
+<text class="c" x="299.0" y="278.0">T67</text>
+<text class="r" x="299.0" y="287.0">r1</text>
+<rect x="316" y="268" width="34" height="22" fill="#dbf1c5"/>
+<text class="c" x="333.0" y="278.0">T68</text>
+<text class="r" x="333.0" y="287.0">r0</text>
+<rect x="350" y="268" width="34" height="22" fill="#cbf1c5"/>
+<text class="c" x="367.0" y="278.0">T69</text>
+<text class="r" x="367.0" y="287.0">r0</text>
+<rect x="384" y="268" width="34" height="22" fill="#dbf1c5"/>
+<text class="c" x="401.0" y="278.0">T68</text>
+<text class="r" x="401.0" y="287.0">r1</text>
+<rect x="418" y="268" width="34" height="22" fill="#cbf1c5"/>
+<text class="c" x="435.0" y="278.0">T69</text>
+<text class="r" x="435.0" y="287.0">r1</text>
+<rect x="452" y="268" width="34" height="22" fill="#c5f1d0"/>
+<text class="c" x="469.0" y="278.0">T70</text>
+<text class="r" x="469.0" y="287.0">r0</text>
+<rect x="486" y="268" width="34" height="22" fill="#c5f1e1"/>
+<text class="c" x="503.0" y="278.0">T71</text>
+<text class="r" x="503.0" y="287.0">r0</text>
+<rect x="520" y="268" width="34" height="22" fill="#c5f1d0"/>
+<text class="c" x="537.0" y="278.0">T70</text>
+<text class="r" x="537.0" y="287.0">r1</text>
+<rect x="554" y="268" width="34" height="22" fill="#c5f1e1"/>
+<text class="c" x="571.0" y="278.0">T71</text>
+<text class="r" x="571.0" y="287.0">r1</text>
+<rect x="44" y="290" width="34" height="22" fill="#c5f1f1"/>
+<text class="c" x="61.0" y="300.0">T72</text>
+<text class="r" x="61.0" y="309.0">r0</text>
+<rect x="78" y="290" width="34" height="22" fill="#c5e1f1"/>
+<text class="c" x="95.0" y="300.0">T73</text>
+<text class="r" x="95.0" y="309.0">r0</text>
+<rect x="112" y="290" width="34" height="22" fill="#c5f1f1"/>
+<text class="c" x="129.0" y="300.0">T72</text>
+<text class="r" x="129.0" y="309.0">r1</text>
+<rect x="146" y="290" width="34" height="22" fill="#c5e1f1"/>
+<text class="c" x="163.0" y="300.0">T73</text>
+<text class="r" x="163.0" y="309.0">r1</text>
+<rect x="180" y="290" width="34" height="22" fill="#c5d0f1"/>
+<text class="c" x="197.0" y="300.0">T74</text>
+<text class="r" x="197.0" y="309.0">r0</text>
+<rect x="214" y="290" width="34" height="22" fill="#cbc5f1"/>
+<text class="c" x="231.0" y="300.0">T75</text>
+<text class="r" x="231.0" y="309.0">r0</text>
+<rect x="248" y="290" width="34" height="22" fill="#c5d0f1"/>
+<text class="c" x="265.0" y="300.0">T74</text>
+<text class="r" x="265.0" y="309.0">r1</text>
+<rect x="282" y="290" width="34" height="22" fill="#cbc5f1"/>
+<text class="c" x="299.0" y="300.0">T75</text>
+<text class="r" x="299.0" y="309.0">r1</text>
+<rect x="316" y="290" width="34" height="22" fill="#dbc5f1"/>
+<text class="c" x="333.0" y="300.0">T76</text>
+<text class="r" x="333.0" y="309.0">r0</text>
+<rect x="350" y="290" width="34" height="22" fill="#ecc5f1"/>
+<text class="c" x="367.0" y="300.0">T77</text>
+<text class="r" x="367.0" y="309.0">r0</text>
+<rect x="384" y="290" width="34" height="22" fill="#dbc5f1"/>
+<text class="c" x="401.0" y="300.0">T76</text>
+<text class="r" x="401.0" y="309.0">r1</text>
+<rect x="418" y="290" width="34" height="22" fill="#ecc5f1"/>
+<text class="c" x="435.0" y="300.0">T77</text>
+<text class="r" x="435.0" y="309.0">r1</text>
+<rect x="452" y="290" width="34" height="22" fill="#f1c5e6"/>
+<text class="c" x="469.0" y="300.0">T78</text>
+<text class="r" x="469.0" y="309.0">r0</text>
+<rect x="486" y="290" width="34" height="22" fill="#f1c5d6"/>
+<text class="c" x="503.0" y="300.0">T79</text>
+<text class="r" x="503.0" y="309.0">r0</text>
+<rect x="520" y="290" width="34" height="22" fill="#f1c5e6"/>
+<text class="c" x="537.0" y="300.0">T78</text>
+<text class="r" x="537.0" y="309.0">r1</text>
+<rect x="554" y="290" width="34" height="22" fill="#f1c5d6"/>
+<text class="c" x="571.0" y="300.0">T79</text>
+<text class="r" x="571.0" y="309.0">r1</text>
+<rect x="44" y="312" width="34" height="22" fill="#e9a0a0"/>
+<text class="c" x="61.0" y="322.0">T80</text>
+<text class="r" x="61.0" y="331.0">r0</text>
+<rect x="78" y="312" width="34" height="22" fill="#e9bba0"/>
+<text class="c" x="95.0" y="322.0">T81</text>
+<text class="r" x="95.0" y="331.0">r0</text>
+<rect x="112" y="312" width="34" height="22" fill="#e9a0a0"/>
+<text class="c" x="129.0" y="322.0">T80</text>
+<text class="r" x="129.0" y="331.0">r1</text>
+<rect x="146" y="312" width="34" height="22" fill="#e9bba0"/>
+<text class="c" x="163.0" y="322.0">T81</text>
+<text class="r" x="163.0" y="331.0">r1</text>
+<rect x="180" y="312" width="34" height="22" fill="#e9d7a0"/>
+<text class="c" x="197.0" y="322.0">T82</text>
+<text class="r" x="197.0" y="331.0">r0</text>
+<rect x="214" y="312" width="34" height="22" fill="#e0e9a0"/>
+<text class="c" x="231.0" y="322.0">T83</text>
+<text class="r" x="231.0" y="331.0">r0</text>
+<rect x="248" y="312" width="34" height="22" fill="#e9d7a0"/>
+<text class="c" x="265.0" y="322.0">T82</text>
+<text class="r" x="265.0" y="331.0">r1</text>
+<rect x="282" y="312" width="34" height="22" fill="#e0e9a0"/>
+<text class="c" x="299.0" y="322.0">T83</text>
+<text class="r" x="299.0" y="331.0">r1</text>
+<rect x="316" y="312" width="34" height="22" fill="#c4e9a0"/>
+<text class="c" x="333.0" y="322.0">T84</text>
+<text class="r" x="333.0" y="331.0">r0</text>
+<rect x="350" y="312" width="34" height="22" fill="#a9e9a0"/>
+<text class="c" x="367.0" y="322.0">T85</text>
+<text class="r" x="367.0" y="331.0">r0</text>
+<rect x="384" y="312" width="34" height="22" fill="#c4e9a0"/>
+<text class="c" x="401.0" y="322.0">T84</text>
+<text class="r" x="401.0" y="331.0">r1</text>
+<rect x="418" y="312" width="34" height="22" fill="#a9e9a0"/>
+<text class="c" x="435.0" y="322.0">T85</text>
+<text class="r" x="435.0" y="331.0">r1</text>
+<rect x="452" y="312" width="34" height="22" fill="#a0e9b2"/>
+<text class="c" x="469.0" y="322.0">T86</text>
+<text class="r" x="469.0" y="331.0">r0</text>
+<rect x="486" y="312" width="34" height="22" fill="#a0e9cd"/>
+<text class="c" x="503.0" y="322.0">T87</text>
+<text class="r" x="503.0" y="331.0">r0</text>
+<rect x="520" y="312" width="34" height="22" fill="#a0e9b2"/>
+<text class="c" x="537.0" y="322.0">T86</text>
+<text class="r" x="537.0" y="331.0">r1</text>
+<rect x="554" y="312" width="34" height="22" fill="#a0e9cd"/>
+<text class="c" x="571.0" y="322.0">T87</text>
+<text class="r" x="571.0" y="331.0">r1</text>
+<rect x="44" y="334" width="34" height="22" fill="#a0e9e9"/>
+<text class="c" x="61.0" y="344.0">T88</text>
+<text class="r" x="61.0" y="353.0">r0</text>
+<rect x="78" y="334" width="34" height="22" fill="#a0cde9"/>
+<text class="c" x="95.0" y="344.0">T89</text>
+<text class="r" x="95.0" y="353.0">r0</text>
+<rect x="112" y="334" width="34" height="22" fill="#a0e9e9"/>
+<text class="c" x="129.0" y="344.0">T88</text>
+<text class="r" x="129.0" y="353.0">r1</text>
+<rect x="146" y="334" width="34" height="22" fill="#a0cde9"/>
+<text class="c" x="163.0" y="344.0">T89</text>
+<text class="r" x="163.0" y="353.0">r1</text>
+<rect x="180" y="334" width="34" height="22" fill="#a0b2e9"/>
+<text class="c" x="197.0" y="344.0">T90</text>
+<text class="r" x="197.0" y="353.0">r0</text>
+<rect x="214" y="334" width="34" height="22" fill="#a9a0e9"/>
+<text class="c" x="231.0" y="344.0">T91</text>
+<text class="r" x="231.0" y="353.0">r0</text>
+<rect x="248" y="334" width="34" height="22" fill="#a0b2e9"/>
+<text class="c" x="265.0" y="344.0">T90</text>
+<text class="r" x="265.0" y="353.0">r1</text>
+<rect x="282" y="334" width="34" height="22" fill="#a9a0e9"/>
+<text class="c" x="299.0" y="344.0">T91</text>
+<text class="r" x="299.0" y="353.0">r1</text>
+<rect x="316" y="334" width="34" height="22" fill="#c4a0e9"/>
+<text class="c" x="333.0" y="344.0">T92</text>
+<text class="r" x="333.0" y="353.0">r0</text>
+<rect x="350" y="334" width="34" height="22" fill="#e0a0e9"/>
+<text class="c" x="367.0" y="344.0">T93</text>
+<text class="r" x="367.0" y="353.0">r0</text>
+<rect x="384" y="334" width="34" height="22" fill="#c4a0e9"/>
+<text class="c" x="401.0" y="344.0">T92</text>
+<text class="r" x="401.0" y="353.0">r1</text>
+<rect x="418" y="334" width="34" height="22" fill="#e0a0e9"/>
+<text class="c" x="435.0" y="344.0">T93</text>
+<text class="r" x="435.0" y="353.0">r1</text>
+<rect x="452" y="334" width="34" height="22" fill="#e9a0d7"/>
+<text class="c" x="469.0" y="344.0">T94</text>
+<text class="r" x="469.0" y="353.0">r0</text>
+<rect x="486" y="334" width="34" height="22" fill="#e9a0bb"/>
+<text class="c" x="503.0" y="344.0">T95</text>
+<text class="r" x="503.0" y="353.0">r0</text>
+<rect x="520" y="334" width="34" height="22" fill="#e9a0d7"/>
+<text class="c" x="537.0" y="344.0">T94</text>
+<text class="r" x="537.0" y="353.0">r1</text>
+<rect x="554" y="334" width="34" height="22" fill="#e9a0bb"/>
+<text class="c" x="571.0" y="344.0">T95</text>
+<text class="r" x="571.0" y="353.0">r1</text>
+<rect x="44" y="356" width="34" height="22" fill="#e07b7b"/>
+<text class="c" x="61.0" y="366.0">T96</text>
+<text class="r" x="61.0" y="375.0">r0</text>
+<rect x="78" y="356" width="34" height="22" fill="#e0a17b"/>
+<text class="c" x="95.0" y="366.0">T97</text>
+<text class="r" x="95.0" y="375.0">r0</text>
+<rect x="112" y="356" width="34" height="22" fill="#e07b7b"/>
+<text class="c" x="129.0" y="366.0">T96</text>
+<text class="r" x="129.0" y="375.0">r1</text>
+<rect x="146" y="356" width="34" height="22" fill="#e0a17b"/>
+<text class="c" x="163.0" y="366.0">T97</text>
+<text class="r" x="163.0" y="375.0">r1</text>
+<rect x="180" y="356" width="34" height="22" fill="#e0c77b"/>
+<text class="c" x="197.0" y="366.0">T98</text>
+<text class="r" x="197.0" y="375.0">r0</text>
+<rect x="214" y="356" width="34" height="22" fill="#d3e07b"/>
+<text class="c" x="231.0" y="366.0">T99</text>
+<text class="r" x="231.0" y="375.0">r0</text>
+<rect x="248" y="356" width="34" height="22" fill="#e0c77b"/>
+<text class="c" x="265.0" y="366.0">T98</text>
+<text class="r" x="265.0" y="375.0">r1</text>
+<rect x="282" y="356" width="34" height="22" fill="#d3e07b"/>
+<text class="c" x="299.0" y="366.0">T99</text>
+<text class="r" x="299.0" y="375.0">r1</text>
+<rect x="316" y="356" width="34" height="22" fill="#ade07b"/>
+<text class="c" x="333.0" y="366.0">T100</text>
+<text class="r" x="333.0" y="375.0">r0</text>
+<rect x="350" y="356" width="34" height="22" fill="#87e07b"/>
+<text class="c" x="367.0" y="366.0">T101</text>
+<text class="r" x="367.0" y="375.0">r0</text>
+<rect x="384" y="356" width="34" height="22" fill="#ade07b"/>
+<text class="c" x="401.0" y="366.0">T100</text>
+<text class="r" x="401.0" y="375.0">r1</text>
+<rect x="418" y="356" width="34" height="22" fill="#87e07b"/>
+<text class="c" x="435.0" y="366.0">T101</text>
+<text class="r" x="435.0" y="375.0">r1</text>
+<rect x="452" y="356" width="34" height="22" fill="#7be094"/>
+<text class="c" x="469.0" y="366.0">T102</text>
+<text class="r" x="469.0" y="375.0">r0</text>
+<rect x="486" y="356" width="34" height="22" fill="#7be0ba"/>
+<text class="c" x="503.0" y="366.0">T103</text>
+<text class="r" x="503.0" y="375.0">r0</text>
+<rect x="520" y="356" width="34" height="22" fill="#7be094"/>
+<text class="c" x="537.0" y="366.0">T102</text>
+<text class="r" x="537.0" y="375.0">r1</text>
+<rect x="554" y="356" width="34" height="22" fill="#7be0ba"/>
+<text class="c" x="571.0" y="366.0">T103</text>
+<text class="r" x="571.0" y="375.0">r1</text>
+<rect x="44" y="378" width="34" height="22" fill="#7be0e0"/>
+<text class="c" x="61.0" y="388.0">T104</text>
+<text class="r" x="61.0" y="397.0">r0</text>
+<rect x="78" y="378" width="34" height="22" fill="#7bbae0"/>
+<text class="c" x="95.0" y="388.0">T105</text>
+<text class="r" x="95.0" y="397.0">r0</text>
+<rect x="112" y="378" width="34" height="22" fill="#7be0e0"/>
+<text class="c" x="129.0" y="388.0">T104</text>
+<text class="r" x="129.0" y="397.0">r1</text>
+<rect x="146" y="378" width="34" height="22" fill="#7bbae0"/>
+<text class="c" x="163.0" y="388.0">T105</text>
+<text class="r" x="163.0" y="397.0">r1</text>
+<rect x="180" y="378" width="34" height="22" fill="#7b94e0"/>
+<text class="c" x="197.0" y="388.0">T106</text>
+<text class="r" x="197.0" y="397.0">r0</text>
+<rect x="214" y="378" width="34" height="22" fill="#877be0"/>
+<text class="c" x="231.0" y="388.0">T107</text>
+<text class="r" x="231.0" y="397.0">r0</text>
+<rect x="248" y="378" width="34" height="22" fill="#7b94e0"/>
+<text class="c" x="265.0" y="388.0">T106</text>
+<text class="r" x="265.0" y="397.0">r1</text>
+<rect x="282" y="378" width="34" height="22" fill="#877be0"/>
+<text class="c" x="299.0" y="388.0">T107</text>
+<text class="r" x="299.0" y="397.0">r1</text>
+<rect x="316" y="378" width="34" height="22" fill="#ad7be0"/>
+<text class="c" x="333.0" y="388.0">T108</text>
+<text class="r" x="333.0" y="397.0">r0</text>
+<rect x="350" y="378" width="34" height="22" fill="#d37be0"/>
+<text class="c" x="367.0" y="388.0">T109</text>
+<text class="r" x="367.0" y="397.0">r0</text>
+<rect x="384" y="378" width="34" height="22" fill="#ad7be0"/>
+<text class="c" x="401.0" y="388.0">T108</text>
+<text class="r" x="401.0" y="397.0">r1</text>
+<rect x="418" y="378" width="34" height="22" fill="#d37be0"/>
+<text class="c" x="435.0" y="388.0">T109</text>
+<text class="r" x="435.0" y="397.0">r1</text>
+<rect x="452" y="378" width="34" height="22" fill="#e07bc7"/>
+<text class="c" x="469.0" y="388.0">T110</text>
+<text class="r" x="469.0" y="397.0">r0</text>
+<rect x="486" y="378" width="34" height="22" fill="#e07ba1"/>
+<text class="c" x="503.0" y="388.0">T111</text>
+<text class="r" x="503.0" y="397.0">r0</text>
+<rect x="520" y="378" width="34" height="22" fill="#e07bc7"/>
+<text class="c" x="537.0" y="388.0">T110</text>
+<text class="r" x="537.0" y="397.0">r1</text>
+<rect x="554" y="378" width="34" height="22" fill="#e07ba1"/>
+<text class="c" x="571.0" y="388.0">T111</text>
+<text class="r" x="571.0" y="397.0">r1</text>
+<rect x="44" y="400" width="34" height="22" fill="#d75656"/>
+<text class="c" x="61.0" y="410.0">T112</text>
+<text class="r" x="61.0" y="419.0">r0</text>
+<rect x="78" y="400" width="34" height="22" fill="#d78656"/>
+<text class="c" x="95.0" y="410.0">T113</text>
+<text class="r" x="95.0" y="419.0">r0</text>
+<rect x="112" y="400" width="34" height="22" fill="#d75656"/>
+<text class="c" x="129.0" y="410.0">T112</text>
+<text class="r" x="129.0" y="419.0">r1</text>
+<rect x="146" y="400" width="34" height="22" fill="#d78656"/>
+<text class="c" x="163.0" y="410.0">T113</text>
+<text class="r" x="163.0" y="419.0">r1</text>
+<rect x="180" y="400" width="34" height="22" fill="#d7b756"/>
+<text class="c" x="197.0" y="410.0">T114</text>
+<text class="r" x="197.0" y="419.0">r0</text>
+<rect x="214" y="400" width="34" height="22" fill="#c7d756"/>
+<text class="c" x="231.0" y="410.0">T115</text>
+<text class="r" x="231.0" y="419.0">r0</text>
+<rect x="248" y="400" width="34" height="22" fill="#d7b756"/>
+<text class="c" x="265.0" y="410.0">T114</text>
+<text class="r" x="265.0" y="419.0">r1</text>
+<rect x="282" y="400" width="34" height="22" fill="#c7d756"/>
+<text class="c" x="299.0" y="410.0">T115</text>
+<text class="r" x="299.0" y="419.0">r1</text>
+<rect x="316" y="400" width="34" height="22" fill="#96d756"/>
+<text class="c" x="333.0" y="410.0">T116</text>
+<text class="r" x="333.0" y="419.0">r0</text>
+<rect x="350" y="400" width="34" height="22" fill="#66d756"/>
+<text class="c" x="367.0" y="410.0">T117</text>
+<text class="r" x="367.0" y="419.0">r0</text>
+<rect x="384" y="400" width="34" height="22" fill="#96d756"/>
+<text class="c" x="401.0" y="410.0">T116</text>
+<text class="r" x="401.0" y="419.0">r1</text>
+<rect x="418" y="400" width="34" height="22" fill="#66d756"/>
+<text class="c" x="435.0" y="410.0">T117</text>
+<text class="r" x="435.0" y="419.0">r1</text>
+<rect x="452" y="400" width="34" height="22" fill="#56d776"/>
+<text class="c" x="469.0" y="410.0">T118</text>
+<text class="r" x="469.0" y="419.0">r0</text>
+<rect x="486" y="400" width="34" height="22" fill="#56d7a7"/>
+<text class="c" x="503.0" y="410.0">T119</text>
+<text class="r" x="503.0" y="419.0">r0</text>
+<rect x="520" y="400" width="34" height="22" fill="#56d776"/>
+<text class="c" x="537.0" y="410.0">T118</text>
+<text class="r" x="537.0" y="419.0">r1</text>
+<rect x="554" y="400" width="34" height="22" fill="#56d7a7"/>
+<text class="c" x="571.0" y="410.0">T119</text>
+<text class="r" x="571.0" y="419.0">r1</text>
+<rect x="44" y="422" width="34" height="22" fill="#56d7d7"/>
+<text class="c" x="61.0" y="432.0">T120</text>
+<text class="r" x="61.0" y="441.0">r0</text>
+<rect x="78" y="422" width="34" height="22" fill="#56a7d7"/>
+<text class="c" x="95.0" y="432.0">T121</text>
+<text class="r" x="95.0" y="441.0">r0</text>
+<rect x="112" y="422" width="34" height="22" fill="#56d7d7"/>
+<text class="c" x="129.0" y="432.0">T120</text>
+<text class="r" x="129.0" y="441.0">r1</text>
+<rect x="146" y="422" width="34" height="22" fill="#56a7d7"/>
+<text class="c" x="163.0" y="432.0">T121</text>
+<text class="r" x="163.0" y="441.0">r1</text>
+<rect x="180" y="422" width="34" height="22" fill="#5676d7"/>
+<text class="c" x="197.0" y="432.0">T122</text>
+<text class="r" x="197.0" y="441.0">r0</text>
+<rect x="214" y="422" width="34" height="22" fill="#6656d7"/>
+<text class="c" x="231.0" y="432.0">T123</text>
+<text class="r" x="231.0" y="441.0">r0</text>
+<rect x="248" y="422" width="34" height="22" fill="#5676d7"/>
+<text class="c" x="265.0" y="432.0">T122</text>
+<text class="r" x="265.0" y="441.0">r1</text>
+<rect x="282" y="422" width="34" height="22" fill="#6656d7"/>
+<text class="c" x="299.0" y="432.0">T123</text>
+<text class="r" x="299.0" y="441.0">r1</text>
+<rect x="316" y="422" width="34" height="22" fill="#9656d7"/>
+<text class="c" x="333.0" y="432.0">T124</text>
+<text class="r" x="333.0" y="441.0">r0</text>
+<rect x="350" y="422" width="34" height="22" fill="#c756d7"/>
+<text class="c" x="367.0" y="432.0">T125</text>
+<text class="r" x="367.0" y="441.0">r0</text>
+<rect x="384" y="422" width="34" height="22" fill="#9656d7"/>
+<text class="c" x="401.0" y="432.0">T124</text>
+<text class="r" x="401.0" y="441.0">r1</text>
+<rect x="418" y="422" width="34" height="22" fill="#c756d7"/>
+<text class="c" x="435.0" y="432.0">T125</text>
+<text class="r" x="435.0" y="441.0">r1</text>
+<rect x="452" y="422" width="34" height="22" fill="#d756b7"/>
+<text class="c" x="469.0" y="432.0">T126</text>
+<text class="r" x="469.0" y="441.0">r0</text>
+<rect x="486" y="422" width="34" height="22" fill="#d75686"/>
+<text class="c" x="503.0" y="432.0">T127</text>
+<text class="r" x="503.0" y="441.0">r0</text>
+<rect x="520" y="422" width="34" height="22" fill="#d756b7"/>
+<text class="c" x="537.0" y="432.0">T126</text>
+<text class="r" x="537.0" y="441.0">r1</text>
+<rect x="554" y="422" width="34" height="22" fill="#d75686"/>
+<text class="c" x="571.0" y="432.0">T127</text>
+<text class="r" x="571.0" y="441.0">r1</text>
+<path d="M78 92v22 M44 114h34 M44 92v22 M44 92h34 M112 92v22 M78 114h34 M78 92h34 M146 92v22 M112 114h34 M112 92h34 M180 92v22 M146 114h34 M146 92h34 M214 92v22 M180 114h34 M180 92h34 M248 92v22 M214 114h34 M214 92h34 M282 92v22 M248 114h34 M248 92h34 M316 92v22 M282 114h34 M282 92h34 M350 92v22 M316 114h34 M316 92h34 M384 92v22 M350 114h34 M350 92h34 M418 92v22 M384 114h34 M384 92h34 M452 92v22 M418 114h34 M418 92h34 M486 92v22 M452 114h34 M452 92h34 M520 92v22 M486 114h34 M486 92h34 M554 92v22 M520 114h34 M520 92h34 M588 92v22 M554 114h34 M554 92h34 M78 114v22 M44 136h34 M44 114v22 M112 114v22 M78 136h34 M146 114v22 M112 136h34 M180 114v22 M146 136h34 M214 114v22 M180 136h34 M248 114v22 M214 136h34 M282 114v22 M248 136h34 M316 114v22 M282 136h34 M350 114v22 M316 136h34 M384 114v22 M350 136h34 M418 114v22 M384 136h34 M452 114v22 M418 136h34 M486 114v22 M452 136h34 M520 114v22 M486 136h34 M554 114v22 M520 136h34 M588 114v22 M554 136h34 M78 136v22 M44 158h34 M44 136v22 M112 136v22 M78 158h34 M146 136v22 M112 158h34 M180 136v22 M146 158h34 M214 136v22 M180 158h34 M248 136v22 M214 158h34 M282 136v22 M248 158h34 M316 136v22 M282 158h34 M350 136v22 M316 158h34 M384 136v22 M350 158h34 M418 136v22 M384 158h34 M452 136v22 M418 158h34 M486 136v22 M452 158h34 M520 136v22 M486 158h34 M554 136v22 M520 158h34 M588 136v22 M554 158h34 M78 158v22 M44 180h34 M44 158v22 M112 158v22 M78 180h34 M146 158v22 M112 180h34 M180 158v22 M146 180h34 M214 158v22 M180 180h34 M248 158v22 M214 180h34 M282 158v22 M248 180h34 M316 158v22 M282 180h34 M350 158v22 M316 180h34 M384 158v22 M350 180h34 M418 158v22 M384 180h34 M452 158v22 M418 180h34 M486 158v22 M452 180h34 M520 158v22 M486 180h34 M554 158v22 M520 180h34 M588 158v22 M554 180h34 M78 180v22 M44 202h34 M44 180v22 M112 180v22 M78 202h34 M146 180v22 M112 202h34 M180 180v22 M146 202h34 M214 180v22 M180 202h34 M248 180v22 M214 202h34 M282 180v22 M248 202h34 M316 180v22 M282 202h34 M350 180v22 M316 202h34 M384 180v22 M350 202h34 M418 180v22 M384 202h34 M452 180v22 M418 202h34 M486 180v22 M452 202h34 M520 180v22 M486 202h34 M554 180v22 M520 202h34 M588 180v22 M554 202h34 M78 202v22 M44 224h34 M44 202v22 M112 202v22 M78 224h34 M146 202v22 M112 224h34 M180 202v22 M146 224h34 M214 202v22 M180 224h34 M248 202v22 M214 224h34 M282 202v22 M248 224h34 M316 202v22 M282 224h34 M350 202v22 M316 224h34 M384 202v22 M350 224h34 M418 202v22 M384 224h34 M452 202v22 M418 224h34 M486 202v22 M452 224h34 M520 202v22 M486 224h34 M554 202v22 M520 224h34 M588 202v22 M554 224h34 M78 224v22 M44 246h34 M44 224v22 M112 224v22 M78 246h34 M146 224v22 M112 246h34 M180 224v22 M146 246h34 M214 224v22 M180 246h34 M248 224v22 M214 246h34 M282 224v22 M248 246h34 M316 224v22 M282 246h34 M350 224v22 M316 246h34 M384 224v22 M350 246h34 M418 224v22 M384 246h34 M452 224v22 M418 246h34 M486 224v22 M452 246h34 M520 224v22 M486 246h34 M554 224v22 M520 246h34 M588 224v22 M554 246h34 M78 246v22 M44 268h34 M44 246v22 M112 246v22 M78 268h34 M146 246v22 M112 268h34 M180 246v22 M146 268h34 M214 246v22 M180 268h34 M248 246v22 M214 268h34 M282 246v22 M248 268h34 M316 246v22 M282 268h34 M350 246v22 M316 268h34 M384 246v22 M350 268h34 M418 246v22 M384 268h34 M452 246v22 M418 268h34 M486 246v22 M452 268h34 M520 246v22 M486 268h34 M554 246v22 M520 268h34 M588 246v22 M554 268h34 M78 268v22 M44 290h34 M44 268v22 M112 268v22 M78 290h34 M146 268v22 M112 290h34 M180 268v22 M146 290h34 M214 268v22 M180 290h34 M248 268v22 M214 290h34 M282 268v22 M248 290h34 M316 268v22 M282 290h34 M350 268v22 M316 290h34 M384 268v22 M350 290h34 M418 268v22 M384 290h34 M452 268v22 M418 290h34 M486 268v22 M452 290h34 M520 268v22 M486 290h34 M554 268v22 M520 290h34 M588 268v22 M554 290h34 M78 290v22 M44 312h34 M44 290v22 M112 290v22 M78 312h34 M146 290v22 M112 312h34 M180 290v22 M146 312h34 M214 290v22 M180 312h34 M248 290v22 M214 312h34 M282 290v22 M248 312h34 M316 290v22 M282 312h34 M350 290v22 M316 312h34 M384 290v22 M350 312h34 M418 290v22 M384 312h34 M452 290v22 M418 312h34 M486 290v22 M452 312h34 M520 290v22 M486 312h34 M554 290v22 M520 312h34 M588 290v22 M554 312h34 M78 312v22 M44 334h34 M44 312v22 M112 312v22 M78 334h34 M146 312v22 M112 334h34 M180 312v22 M146 334h34 M214 312v22 M180 334h34 M248 312v22 M214 334h34 M282 312v22 M248 334h34 M316 312v22 M282 334h34 M350 312v22 M316 334h34 M384 312v22 M350 334h34 M418 312v22 M384 334h34 M452 312v22 M418 334h34 M486 312v22 M452 334h34 M520 312v22 M486 334h34 M554 312v22 M520 334h34 M588 312v22 M554 334h34 M78 334v22 M44 356h34 M44 334v22 M112 334v22 M78 356h34 M146 334v22 M112 356h34 M180 334v22 M146 356h34 M214 334v22 M180 356h34 M248 334v22 M214 356h34 M282 334v22 M248 356h34 M316 334v22 M282 356h34 M350 334v22 M316 356h34 M384 334v22 M350 356h34 M418 334v22 M384 356h34 M452 334v22 M418 356h34 M486 334v22 M452 356h34 M520 334v22 M486 356h34 M554 334v22 M520 356h34 M588 334v22 M554 356h34 M78 356v22 M44 378h34 M44 356v22 M112 356v22 M78 378h34 M146 356v22 M112 378h34 M180 356v22 M146 378h34 M214 356v22 M180 378h34 M248 356v22 M214 378h34 M282 356v22 M248 378h34 M316 356v22 M282 378h34 M350 356v22 M316 378h34 M384 356v22 M350 378h34 M418 356v22 M384 378h34 M452 356v22 M418 378h34 M486 356v22 M452 378h34 M520 356v22 M486 378h34 M554 356v22 M520 378h34 M588 356v22 M554 378h34 M78 378v22 M44 400h34 M44 378v22 M112 378v22 M78 400h34 M146 378v22 M112 400h34 M180 378v22 M146 400h34 M214 378v22 M180 400h34 M248 378v22 M214 400h34 M282 378v22 M248 400h34 M316 378v22 M282 400h34 M350 378v22 M316 400h34 M384 378v22 M350 400h34 M418 378v22 M384 400h34 M452 378v22 M418 400h34 M486 378v22 M452 400h34 M520 378v22 M486 400h34 M554 378v22 M520 400h34 M588 378v22 M554 400h34 M78 400v22 M44 422h34 M44 400v22 M112 400v22 M78 422h34 M146 400v22 M112 422h34 M180 400v22 M146 422h34 M214 400v22 M180 422h34 M248 400v22 M214 422h34 M282 400v22 M248 422h34 M316 400v22 M282 422h34 M350 400v22 M316 422h34 M384 400v22 M350 422h34 M418 400v22 M384 422h34 M452 400v22 M418 422h34 M486 400v22 M452 422h34 M520 400v22 M486 422h34 M554 400v22 M520 422h34 M588 400v22 M554 422h34 M78 422v22 M44 444h34 M44 422v22 M112 422v22 M78 444h34 M146 422v22 M112 444h34 M180 422v22 M146 444h34 M214 422v22 M180 444h34 M248 422v22 M214 444h34 M282 422v22 M248 444h34 M316 422v22 M282 444h34 M350 422v22 M316 444h34 M384 422v22 M350 444h34 M418 422v22 M384 444h34 M452 422v22 M418 444h34 M486 422v22 M452 444h34 M520 422v22 M486 444h34 M554 422v22 M520 444h34 M588 422v22 M554 444h34" stroke="#777" stroke-width="0.8" fill="none"/>
+<path d="M44 92v22 M44 92h34 M78 92h34 M112 92h34 M146 92h34 M180 92h34 M214 92h34 M248 92h34 M282 92h34 M316 92h34 M350 92h34 M384 92h34 M418 92h34 M452 92h34 M486 92h34 M520 92h34 M588 92v22 M554 92h34 M44 114v22 M588 114v22 M44 136v22 M588 136v22 M44 158v22 M588 158v22 M44 180v22 M588 180v22 M44 202v22 M588 202v22 M44 224v22 M588 224v22 M44 268h34 M44 246v22 M78 268h34 M112 268h34 M146 268h34 M180 268h34 M214 268h34 M248 268h34 M282 268h34 M316 268h34 M350 268h34 M384 268h34 M418 268h34 M452 268h34 M486 268h34 M520 268h34 M588 246v22 M554 268h34 M44 268v22 M588 268v22 M44 290v22 M588 290v22 M44 312v22 M588 312v22 M44 334v22 M588 334v22 M44 356v22 M588 356v22 M44 378v22 M588 378v22 M44 400v22 M588 400v22 M44 444h34 M44 422v22 M78 444h34 M112 444h34 M146 444h34 M180 444h34 M214 444h34 M248 444h34 M282 444h34 M316 444h34 M350 444h34 M384 444h34 M418 444h34 M452 444h34 M486 444h34 M520 444h34 M588 422v22 M554 444h34" stroke="#111" stroke-width="2.6" fill="none"/>
+<path d="M78 92v22 M44 114h34 M44 92v22 M44 92h34 M112 92v22 M146 92v22 M112 114h34 M112 92h34" stroke="black" stroke-width="2.2" fill="none"/>
+<text x="14" y="470" xml:space="preserve">reg   r0(0, 2)</text>
+<text x="14" y="486" xml:space="preserve">lane  l0(0, 1)  l1(0, 4)  l2(0, 8)  l3(1, 0)  l4(2, 0)  l5(4, 0)</text>
+<text x="14" y="502" xml:space="preserve">warp  w0(8, 0)</text>
+<text x="14" y="518" xml:space="preserve">element coordinate = XOR of the bases of all set reg / lane / warp bits</text>
+<text class="k" x="14" y="548">lane colour key</text>
+<rect x="14" y="556" width="26" height="16" fill="#f1c5c5" stroke="white"/>
+<text class="c" x="27.0" y="568">0</text>
+<rect x="40" y="556" width="26" height="16" fill="#f1d6c5" stroke="white"/>
+<text class="c" x="53.0" y="568">1</text>
+<rect x="66" y="556" width="26" height="16" fill="#f1e6c5" stroke="white"/>
+<text class="c" x="79.0" y="568">2</text>
+<rect x="92" y="556" width="26" height="16" fill="#ecf1c5" stroke="white"/>
+<text class="c" x="105.0" y="568">3</text>
+<rect x="118" y="556" width="26" height="16" fill="#dbf1c5" stroke="white"/>
+<text class="c" x="131.0" y="568">4</text>
+<rect x="144" y="556" width="26" height="16" fill="#cbf1c5" stroke="white"/>
+<text class="c" x="157.0" y="568">5</text>
+<rect x="170" y="556" width="26" height="16" fill="#c5f1d0" stroke="white"/>
+<text class="c" x="183.0" y="568">6</text>
+<rect x="196" y="556" width="26" height="16" fill="#c5f1e1" stroke="white"/>
+<text class="c" x="209.0" y="568">7</text>
+<rect x="222" y="556" width="26" height="16" fill="#c5f1f1" stroke="white"/>
+<text class="c" x="235.0" y="568">8</text>
+<rect x="248" y="556" width="26" height="16" fill="#c5e1f1" stroke="white"/>
+<text class="c" x="261.0" y="568">9</text>
+<rect x="274" y="556" width="26" height="16" fill="#c5d0f1" stroke="white"/>
+<text class="c" x="287.0" y="568">10</text>
+<rect x="300" y="556" width="26" height="16" fill="#cbc5f1" stroke="white"/>
+<text class="c" x="313.0" y="568">11</text>
+<rect x="326" y="556" width="26" height="16" fill="#dbc5f1" stroke="white"/>
+<text class="c" x="339.0" y="568">12</text>
+<rect x="352" y="556" width="26" height="16" fill="#ecc5f1" stroke="white"/>
+<text class="c" x="365.0" y="568">13</text>
+<rect x="378" y="556" width="26" height="16" fill="#f1c5e6" stroke="white"/>
+<text class="c" x="391.0" y="568">14</text>
+<rect x="404" y="556" width="26" height="16" fill="#f1c5d6" stroke="white"/>
+<text class="c" x="417.0" y="568">15</text>
+<rect x="14" y="572" width="26" height="16" fill="#e9a0a0" stroke="white"/>
+<text class="c" x="27.0" y="584">16</text>
+<rect x="40" y="572" width="26" height="16" fill="#e9bba0" stroke="white"/>
+<text class="c" x="53.0" y="584">17</text>
+<rect x="66" y="572" width="26" height="16" fill="#e9d7a0" stroke="white"/>
+<text class="c" x="79.0" y="584">18</text>
+<rect x="92" y="572" width="26" height="16" fill="#e0e9a0" stroke="white"/>
+<text class="c" x="105.0" y="584">19</text>
+<rect x="118" y="572" width="26" height="16" fill="#c4e9a0" stroke="white"/>
+<text class="c" x="131.0" y="584">20</text>
+<rect x="144" y="572" width="26" height="16" fill="#a9e9a0" stroke="white"/>
+<text class="c" x="157.0" y="584">21</text>
+<rect x="170" y="572" width="26" height="16" fill="#a0e9b2" stroke="white"/>
+<text class="c" x="183.0" y="584">22</text>
+<rect x="196" y="572" width="26" height="16" fill="#a0e9cd" stroke="white"/>
+<text class="c" x="209.0" y="584">23</text>
+<rect x="222" y="572" width="26" height="16" fill="#a0e9e9" stroke="white"/>
+<text class="c" x="235.0" y="584">24</text>
+<rect x="248" y="572" width="26" height="16" fill="#a0cde9" stroke="white"/>
+<text class="c" x="261.0" y="584">25</text>
+<rect x="274" y="572" width="26" height="16" fill="#a0b2e9" stroke="white"/>
+<text class="c" x="287.0" y="584">26</text>
+<rect x="300" y="572" width="26" height="16" fill="#a9a0e9" stroke="white"/>
+<text class="c" x="313.0" y="584">27</text>
+<rect x="326" y="572" width="26" height="16" fill="#c4a0e9" stroke="white"/>
+<text class="c" x="339.0" y="584">28</text>
+<rect x="352" y="572" width="26" height="16" fill="#e0a0e9" stroke="white"/>
+<text class="c" x="365.0" y="584">29</text>
+<rect x="378" y="572" width="26" height="16" fill="#e9a0d7" stroke="white"/>
+<text class="c" x="391.0" y="584">30</text>
+<rect x="404" y="572" width="26" height="16" fill="#e9a0bb" stroke="white"/>
+<text class="c" x="417.0" y="584">31</text>
+<rect x="14" y="588" width="26" height="16" fill="#e07b7b" stroke="white"/>
+<text class="c" x="27.0" y="600">32</text>
+<rect x="40" y="588" width="26" height="16" fill="#e0a17b" stroke="white"/>
+<text class="c" x="53.0" y="600">33</text>
+<rect x="66" y="588" width="26" height="16" fill="#e0c77b" stroke="white"/>
+<text class="c" x="79.0" y="600">34</text>
+<rect x="92" y="588" width="26" height="16" fill="#d3e07b" stroke="white"/>
+<text class="c" x="105.0" y="600">35</text>
+<rect x="118" y="588" width="26" height="16" fill="#ade07b" stroke="white"/>
+<text class="c" x="131.0" y="600">36</text>
+<rect x="144" y="588" width="26" height="16" fill="#87e07b" stroke="white"/>
+<text class="c" x="157.0" y="600">37</text>
+<rect x="170" y="588" width="26" height="16" fill="#7be094" stroke="white"/>
+<text class="c" x="183.0" y="600">38</text>
+<rect x="196" y="588" width="26" height="16" fill="#7be0ba" stroke="white"/>
+<text class="c" x="209.0" y="600">39</text>
+<rect x="222" y="588" width="26" height="16" fill="#7be0e0" stroke="white"/>
+<text class="c" x="235.0" y="600">40</text>
+<rect x="248" y="588" width="26" height="16" fill="#7bbae0" stroke="white"/>
+<text class="c" x="261.0" y="600">41</text>
+<rect x="274" y="588" width="26" height="16" fill="#7b94e0" stroke="white"/>
+<text class="c" x="287.0" y="600">42</text>
+<rect x="300" y="588" width="26" height="16" fill="#877be0" stroke="white"/>
+<text class="c" x="313.0" y="600">43</text>
+<rect x="326" y="588" width="26" height="16" fill="#ad7be0" stroke="white"/>
+<text class="c" x="339.0" y="600">44</text>
+<rect x="352" y="588" width="26" height="16" fill="#d37be0" stroke="white"/>
+<text class="c" x="365.0" y="600">45</text>
+<rect x="378" y="588" width="26" height="16" fill="#e07bc7" stroke="white"/>
+<text class="c" x="391.0" y="600">46</text>
+<rect x="404" y="588" width="26" height="16" fill="#e07ba1" stroke="white"/>
+<text class="c" x="417.0" y="600">47</text>
+<rect x="14" y="604" width="26" height="16" fill="#d75656" stroke="white"/>
+<text class="c" x="27.0" y="616">48</text>
+<rect x="40" y="604" width="26" height="16" fill="#d78656" stroke="white"/>
+<text class="c" x="53.0" y="616">49</text>
+<rect x="66" y="604" width="26" height="16" fill="#d7b756" stroke="white"/>
+<text class="c" x="79.0" y="616">50</text>
+<rect x="92" y="604" width="26" height="16" fill="#c7d756" stroke="white"/>
+<text class="c" x="105.0" y="616">51</text>
+<rect x="118" y="604" width="26" height="16" fill="#96d756" stroke="white"/>
+<text class="c" x="131.0" y="616">52</text>
+<rect x="144" y="604" width="26" height="16" fill="#66d756" stroke="white"/>
+<text class="c" x="157.0" y="616">53</text>
+<rect x="170" y="604" width="26" height="16" fill="#56d776" stroke="white"/>
+<text class="c" x="183.0" y="616">54</text>
+<rect x="196" y="604" width="26" height="16" fill="#56d7a7" stroke="white"/>
+<text class="c" x="209.0" y="616">55</text>
+<rect x="222" y="604" width="26" height="16" fill="#56d7d7" stroke="white"/>
+<text class="c" x="235.0" y="616">56</text>
+<rect x="248" y="604" width="26" height="16" fill="#56a7d7" stroke="white"/>
+<text class="c" x="261.0" y="616">57</text>
+<rect x="274" y="604" width="26" height="16" fill="#5676d7" stroke="white"/>
+<text class="c" x="287.0" y="616">58</text>
+<rect x="300" y="604" width="26" height="16" fill="#6656d7" stroke="white"/>
+<text class="c" x="313.0" y="616">59</text>
+<rect x="326" y="604" width="26" height="16" fill="#9656d7" stroke="white"/>
+<text class="c" x="339.0" y="616">60</text>
+<rect x="352" y="604" width="26" height="16" fill="#c756d7" stroke="white"/>
+<text class="c" x="365.0" y="616">61</text>
+<rect x="378" y="604" width="26" height="16" fill="#d756b7" stroke="white"/>
+<text class="c" x="391.0" y="616">62</text>
+<rect x="404" y="604" width="26" height="16" fill="#d75686" stroke="white"/>
+<text class="c" x="417.0" y="616">63</text>
+<text class="mh" x="563.5" y="548">Reg</text>
+<text class="mh" x="626.0" y="548">Lane</text>
+<text class="mh" x="688.5" y="548">Warp</text>
+<text class="ml" x="535" y="570.5">n</text>
+<text class="ml" x="535" y="638.5">m</text>
+<text class="m0" x="563.5" y="570.5">0</text>
+<text class="m1" x="588.5" y="570.5">1</text>
+<text class="m0" x="603.5" y="570.5">0</text>
+<text class="m0" x="618.5" y="570.5">0</text>
+<text class="m0" x="633.5" y="570.5">0</text>
+<text class="m0" x="648.5" y="570.5">0</text>
+<text class="m0" x="663.5" y="570.5">0</text>
+<text class="m0" x="688.5" y="570.5">0</text>
+<text class="m1" x="563.5" y="587.5">1</text>
+<text class="m0" x="588.5" y="587.5">0</text>
+<text class="m0" x="603.5" y="587.5">0</text>
+<text class="m0" x="618.5" y="587.5">0</text>
+<text class="m0" x="633.5" y="587.5">0</text>
+<text class="m0" x="648.5" y="587.5">0</text>
+<text class="m0" x="663.5" y="587.5">0</text>
+<text class="m0" x="688.5" y="587.5">0</text>
+<text class="m0" x="563.5" y="604.5">0</text>
+<text class="m0" x="588.5" y="604.5">0</text>
+<text class="m1" x="603.5" y="604.5">1</text>
+<text class="m0" x="618.5" y="604.5">0</text>
+<text class="m0" x="633.5" y="604.5">0</text>
+<text class="m0" x="648.5" y="604.5">0</text>
+<text class="m0" x="663.5" y="604.5">0</text>
+<text class="m0" x="688.5" y="604.5">0</text>
+<text class="m0" x="563.5" y="621.5">0</text>
+<text class="m0" x="588.5" y="621.5">0</text>
+<text class="m0" x="603.5" y="621.5">0</text>
+<text class="m1" x="618.5" y="621.5">1</text>
+<text class="m0" x="633.5" y="621.5">0</text>
+<text class="m0" x="648.5" y="621.5">0</text>
+<text class="m0" x="663.5" y="621.5">0</text>
+<text class="m0" x="688.5" y="621.5">0</text>
+<text class="m0" x="563.5" y="638.5">0</text>
+<text class="m0" x="588.5" y="638.5">0</text>
+<text class="m0" x="603.5" y="638.5">0</text>
+<text class="m0" x="618.5" y="638.5">0</text>
+<text class="m1" x="633.5" y="638.5">1</text>
+<text class="m0" x="648.5" y="638.5">0</text>
+<text class="m0" x="663.5" y="638.5">0</text>
+<text class="m0" x="688.5" y="638.5">0</text>
+<text class="m0" x="563.5" y="655.5">0</text>
+<text class="m0" x="588.5" y="655.5">0</text>
+<text class="m0" x="603.5" y="655.5">0</text>
+<text class="m0" x="618.5" y="655.5">0</text>
+<text class="m0" x="633.5" y="655.5">0</text>
+<text class="m1" x="648.5" y="655.5">1</text>
+<text class="m0" x="663.5" y="655.5">0</text>
+<text class="m0" x="688.5" y="655.5">0</text>
+<text class="m0" x="563.5" y="672.5">0</text>
+<text class="m0" x="588.5" y="672.5">0</text>
+<text class="m0" x="603.5" y="672.5">0</text>
+<text class="m0" x="618.5" y="672.5">0</text>
+<text class="m0" x="633.5" y="672.5">0</text>
+<text class="m0" x="648.5" y="672.5">0</text>
+<text class="m1" x="663.5" y="672.5">1</text>
+<text class="m0" x="688.5" y="672.5">0</text>
+<text class="m0" x="563.5" y="689.5">0</text>
+<text class="m0" x="588.5" y="689.5">0</text>
+<text class="m0" x="603.5" y="689.5">0</text>
+<text class="m0" x="618.5" y="689.5">0</text>
+<text class="m0" x="633.5" y="689.5">0</text>
+<text class="m0" x="648.5" y="689.5">0</text>
+<text class="m0" x="663.5" y="689.5">0</text>
+<text class="m1" x="688.5" y="689.5">1</text>
+<path d="M535 554H696.0 M551.0 554V696 M576.0 554V696 M676.0 554V696 M535 626H696.0 M532 536H526V698H532 M698.0 536H704.0V698H698.0" stroke="#222" stroke-width="1.2" fill="none"/>
+<text class="ma" x="486" y="622.0">A =</text>
+<text class="k" x="486" y="714">w = A v (mod 2)</text>
+<text class="k" x="486" y="728">v: reg | lane | warp bits</text>
+<text class="k" x="486" y="742">w: coordinate bits, low bit first</text>
+</svg>

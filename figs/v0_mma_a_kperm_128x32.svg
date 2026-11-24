@@ -1,0 +1,515 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="984" height="952" viewBox="0 0 984 952">
+<style>text{font-family:DejaVu Sans Mono,Menlo,Consolas,monospace;font-size:11px}.c{text-anchor:middle;font-size:9px}.r{text-anchor:middle;font-size:8px;fill:#333}.ax{font-size:9px;fill:#666;paint-order:stroke;stroke:#fff;stroke-width:3px}.k{fill:#444}.lc{text-anchor:middle;font-size:11px}.ls{text-anchor:middle;font-size:9px;fill:#333}.pt{font-size:12px;font-weight:bold}.mh{font-size:12px;text-anchor:middle}.ml{font-size:13px;font-style:italic}.ma{font-size:15px}.m1{font-size:12px;text-anchor:middle;font-weight:bold}.m0{font-size:12px;text-anchor:middle;fill:#9a9a9a}</style>
+<rect width="984" height="952" fill="white"/>
+<text x="14" y="26" style="font-size:16px;font-weight:bold">v0: Mma(tm, &quot;A&quot;, (128, 32)), MFMA 16x16x16 + K perm (4,4,2):(1,8,4)</text>
+<text class="k" x="14" y="48" xml:space="preserve">lens: the framed top-right cell of a panel is magnified in the next panel (same colour)  thread = lane + 64 * warp</text>
+<text class="k" x="14" y="62" xml:space="preserve">      register = r+offset of the warp tile + r in the thread tile</text>
+<path d="M104.0 150L358.6 150M104.0 180.0L358.6 566" stroke="#e8590c" stroke-width="1.3" stroke-dasharray="5 3" fill="none"/>
+<path d="M598.6 150L698.6 150M598.6 176L698.6 180.0" stroke="#7048e8" stroke-width="1.3" stroke-dasharray="5 3" fill="none"/>
+<text class="pt" x="44" y="104">block 128x32</text>
+<text class="k" x="44" y="119">8 warp tiles of 16x32</text>
+<text class="k" x="44" y="133">cell: warp, + register offset</text>
+<rect x="44.0" y="150.0" width="60.0" height="30.0" fill="#cfe2f3" stroke="white"/>
+<text class="lc" x="74.0" y="164.0">w0</text>
+<text class="ls" x="74.0" y="175.0">r+0</text>
+<rect x="44.0" y="180.0" width="60.0" height="30.0" fill="#cfe2f3" stroke="white"/>
+<text class="lc" x="74.0" y="194.0">w0</text>
+<text class="ls" x="74.0" y="205.0">r+4</text>
+<rect x="44.0" y="210.0" width="60.0" height="30.0" fill="#cfe2f3" stroke="white"/>
+<text class="lc" x="74.0" y="224.0">w0</text>
+<text class="ls" x="74.0" y="235.0">r+8</text>
+<rect x="44.0" y="240.0" width="60.0" height="30.0" fill="#cfe2f3" stroke="white"/>
+<text class="lc" x="74.0" y="254.0">w0</text>
+<text class="ls" x="74.0" y="265.0">r+12</text>
+<rect x="44.0" y="270.0" width="60.0" height="30.0" fill="#cfe2f3" stroke="white"/>
+<text class="lc" x="74.0" y="284.0">w0</text>
+<text class="ls" x="74.0" y="295.0">r+16</text>
+<rect x="44.0" y="300.0" width="60.0" height="30.0" fill="#cfe2f3" stroke="white"/>
+<text class="lc" x="74.0" y="314.0">w0</text>
+<text class="ls" x="74.0" y="325.0">r+20</text>
+<rect x="44.0" y="330.0" width="60.0" height="30.0" fill="#cfe2f3" stroke="white"/>
+<text class="lc" x="74.0" y="344.0">w0</text>
+<text class="ls" x="74.0" y="355.0">r+24</text>
+<rect x="44.0" y="360.0" width="60.0" height="30.0" fill="#cfe2f3" stroke="white"/>
+<text class="lc" x="74.0" y="374.0">w0</text>
+<text class="ls" x="74.0" y="385.0">r+28</text>
+<text class="ax" x="74.0" y="146" text-anchor="middle">0</text>
+<text class="ax" x="40" y="168.0" text-anchor="end">0</text>
+<text class="ax" x="40" y="198.0" text-anchor="end">16</text>
+<text class="ax" x="40" y="228.0" text-anchor="end">32</text>
+<text class="ax" x="40" y="258.0" text-anchor="end">48</text>
+<text class="ax" x="40" y="288.0" text-anchor="end">64</text>
+<text class="ax" x="40" y="318.0" text-anchor="end">80</text>
+<text class="ax" x="40" y="348.0" text-anchor="end">96</text>
+<text class="ax" x="40" y="378.0" text-anchor="end">112</text>
+<rect x="44" y="150" width="60.0" height="240.0" fill="none" stroke="#333" stroke-width="1.2"/>
+<rect x="44.0" y="150" width="60.0" height="30.0" fill="none" stroke="#e8590c" stroke-width="3"/>
+<text class="pt" x="358.6" y="104">warp tile 16x32</text>
+<text class="k" x="358.6" y="119">64 thread tiles of 1x8</text>
+<text class="k" x="358.6" y="133">cell: lane</text>
+<rect x="358.6" y="150" width="60.0" height="26" fill="#f1c5c5" stroke="white"/>
+<text class="lc" x="388.6" y="167.0">L0</text>
+<rect x="418.6" y="150" width="60.0" height="26" fill="#e9a0a0" stroke="white"/>
+<text class="lc" x="448.6" y="167.0">L16</text>
+<rect x="478.6" y="150" width="60.0" height="26" fill="#e07b7b" stroke="white"/>
+<text class="lc" x="508.6" y="167.0">L32</text>
+<rect x="538.6" y="150" width="60.0" height="26" fill="#d75656" stroke="white"/>
+<text class="lc" x="568.6" y="167.0">L48</text>
+<rect x="358.6" y="176" width="60.0" height="26" fill="#f1d6c5" stroke="white"/>
+<text class="lc" x="388.6" y="193.0">L1</text>
+<rect x="418.6" y="176" width="60.0" height="26" fill="#e9bba0" stroke="white"/>
+<text class="lc" x="448.6" y="193.0">L17</text>
+<rect x="478.6" y="176" width="60.0" height="26" fill="#e0a17b" stroke="white"/>
+<text class="lc" x="508.6" y="193.0">L33</text>
+<rect x="538.6" y="176" width="60.0" height="26" fill="#d78656" stroke="white"/>
+<text class="lc" x="568.6" y="193.0">L49</text>
+<rect x="358.6" y="202" width="60.0" height="26" fill="#f1e6c5" stroke="white"/>
+<text class="lc" x="388.6" y="219.0">L2</text>
+<rect x="418.6" y="202" width="60.0" height="26" fill="#e9d7a0" stroke="white"/>
+<text class="lc" x="448.6" y="219.0">L18</text>
+<rect x="478.6" y="202" width="60.0" height="26" fill="#e0c77b" stroke="white"/>
+<text class="lc" x="508.6" y="219.0">L34</text>
+<rect x="538.6" y="202" width="60.0" height="26" fill="#d7b756" stroke="white"/>
+<text class="lc" x="568.6" y="219.0">L50</text>
+<rect x="358.6" y="228" width="60.0" height="26" fill="#ecf1c5" stroke="white"/>
+<text class="lc" x="388.6" y="245.0">L3</text>
+<rect x="418.6" y="228" width="60.0" height="26" fill="#e0e9a0" stroke="white"/>
+<text class="lc" x="448.6" y="245.0">L19</text>
+<rect x="478.6" y="228" width="60.0" height="26" fill="#d3e07b" stroke="white"/>
+<text class="lc" x="508.6" y="245.0">L35</text>
+<rect x="538.6" y="228" width="60.0" height="26" fill="#c7d756" stroke="white"/>
+<text class="lc" x="568.6" y="245.0">L51</text>
+<rect x="358.6" y="254" width="60.0" height="26" fill="#dbf1c5" stroke="white"/>
+<text class="lc" x="388.6" y="271.0">L4</text>
+<rect x="418.6" y="254" width="60.0" height="26" fill="#c4e9a0" stroke="white"/>
+<text class="lc" x="448.6" y="271.0">L20</text>
+<rect x="478.6" y="254" width="60.0" height="26" fill="#ade07b" stroke="white"/>
+<text class="lc" x="508.6" y="271.0">L36</text>
+<rect x="538.6" y="254" width="60.0" height="26" fill="#96d756" stroke="white"/>
+<text class="lc" x="568.6" y="271.0">L52</text>
+<rect x="358.6" y="280" width="60.0" height="26" fill="#cbf1c5" stroke="white"/>
+<text class="lc" x="388.6" y="297.0">L5</text>
+<rect x="418.6" y="280" width="60.0" height="26" fill="#a9e9a0" stroke="white"/>
+<text class="lc" x="448.6" y="297.0">L21</text>
+<rect x="478.6" y="280" width="60.0" height="26" fill="#87e07b" stroke="white"/>
+<text class="lc" x="508.6" y="297.0">L37</text>
+<rect x="538.6" y="280" width="60.0" height="26" fill="#66d756" stroke="white"/>
+<text class="lc" x="568.6" y="297.0">L53</text>
+<rect x="358.6" y="306" width="60.0" height="26" fill="#c5f1d0" stroke="white"/>
+<text class="lc" x="388.6" y="323.0">L6</text>
+<rect x="418.6" y="306" width="60.0" height="26" fill="#a0e9b2" stroke="white"/>
+<text class="lc" x="448.6" y="323.0">L22</text>
+<rect x="478.6" y="306" width="60.0" height="26" fill="#7be094" stroke="white"/>
+<text class="lc" x="508.6" y="323.0">L38</text>
+<rect x="538.6" y="306" width="60.0" height="26" fill="#56d776" stroke="white"/>
+<text class="lc" x="568.6" y="323.0">L54</text>
+<rect x="358.6" y="332" width="60.0" height="26" fill="#c5f1e1" stroke="white"/>
+<text class="lc" x="388.6" y="349.0">L7</text>
+<rect x="418.6" y="332" width="60.0" height="26" fill="#a0e9cd" stroke="white"/>
+<text class="lc" x="448.6" y="349.0">L23</text>
+<rect x="478.6" y="332" width="60.0" height="26" fill="#7be0ba" stroke="white"/>
+<text class="lc" x="508.6" y="349.0">L39</text>
+<rect x="538.6" y="332" width="60.0" height="26" fill="#56d7a7" stroke="white"/>
+<text class="lc" x="568.6" y="349.0">L55</text>
+<rect x="358.6" y="358" width="60.0" height="26" fill="#c5f1f1" stroke="white"/>
+<text class="lc" x="388.6" y="375.0">L8</text>
+<rect x="418.6" y="358" width="60.0" height="26" fill="#a0e9e9" stroke="white"/>
+<text class="lc" x="448.6" y="375.0">L24</text>
+<rect x="478.6" y="358" width="60.0" height="26" fill="#7be0e0" stroke="white"/>
+<text class="lc" x="508.6" y="375.0">L40</text>
+<rect x="538.6" y="358" width="60.0" height="26" fill="#56d7d7" stroke="white"/>
+<text class="lc" x="568.6" y="375.0">L56</text>
+<rect x="358.6" y="384" width="60.0" height="26" fill="#c5e1f1" stroke="white"/>
+<text class="lc" x="388.6" y="401.0">L9</text>
+<rect x="418.6" y="384" width="60.0" height="26" fill="#a0cde9" stroke="white"/>
+<text class="lc" x="448.6" y="401.0">L25</text>
+<rect x="478.6" y="384" width="60.0" height="26" fill="#7bbae0" stroke="white"/>
+<text class="lc" x="508.6" y="401.0">L41</text>
+<rect x="538.6" y="384" width="60.0" height="26" fill="#56a7d7" stroke="white"/>
+<text class="lc" x="568.6" y="401.0">L57</text>
+<rect x="358.6" y="410" width="60.0" height="26" fill="#c5d0f1" stroke="white"/>
+<text class="lc" x="388.6" y="427.0">L10</text>
+<rect x="418.6" y="410" width="60.0" height="26" fill="#a0b2e9" stroke="white"/>
+<text class="lc" x="448.6" y="427.0">L26</text>
+<rect x="478.6" y="410" width="60.0" height="26" fill="#7b94e0" stroke="white"/>
+<text class="lc" x="508.6" y="427.0">L42</text>
+<rect x="538.6" y="410" width="60.0" height="26" fill="#5676d7" stroke="white"/>
+<text class="lc" x="568.6" y="427.0">L58</text>
+<rect x="358.6" y="436" width="60.0" height="26" fill="#cbc5f1" stroke="white"/>
+<text class="lc" x="388.6" y="453.0">L11</text>
+<rect x="418.6" y="436" width="60.0" height="26" fill="#a9a0e9" stroke="white"/>
+<text class="lc" x="448.6" y="453.0">L27</text>
+<rect x="478.6" y="436" width="60.0" height="26" fill="#877be0" stroke="white"/>
+<text class="lc" x="508.6" y="453.0">L43</text>
+<rect x="538.6" y="436" width="60.0" height="26" fill="#6656d7" stroke="white"/>
+<text class="lc" x="568.6" y="453.0">L59</text>
+<rect x="358.6" y="462" width="60.0" height="26" fill="#dbc5f1" stroke="white"/>
+<text class="lc" x="388.6" y="479.0">L12</text>
+<rect x="418.6" y="462" width="60.0" height="26" fill="#c4a0e9" stroke="white"/>
+<text class="lc" x="448.6" y="479.0">L28</text>
+<rect x="478.6" y="462" width="60.0" height="26" fill="#ad7be0" stroke="white"/>
+<text class="lc" x="508.6" y="479.0">L44</text>
+<rect x="538.6" y="462" width="60.0" height="26" fill="#9656d7" stroke="white"/>
+<text class="lc" x="568.6" y="479.0">L60</text>
+<rect x="358.6" y="488" width="60.0" height="26" fill="#ecc5f1" stroke="white"/>
+<text class="lc" x="388.6" y="505.0">L13</text>
+<rect x="418.6" y="488" width="60.0" height="26" fill="#e0a0e9" stroke="white"/>
+<text class="lc" x="448.6" y="505.0">L29</text>
+<rect x="478.6" y="488" width="60.0" height="26" fill="#d37be0" stroke="white"/>
+<text class="lc" x="508.6" y="505.0">L45</text>
+<rect x="538.6" y="488" width="60.0" height="26" fill="#c756d7" stroke="white"/>
+<text class="lc" x="568.6" y="505.0">L61</text>
+<rect x="358.6" y="514" width="60.0" height="26" fill="#f1c5e6" stroke="white"/>
+<text class="lc" x="388.6" y="531.0">L14</text>
+<rect x="418.6" y="514" width="60.0" height="26" fill="#e9a0d7" stroke="white"/>
+<text class="lc" x="448.6" y="531.0">L30</text>
+<rect x="478.6" y="514" width="60.0" height="26" fill="#e07bc7" stroke="white"/>
+<text class="lc" x="508.6" y="531.0">L46</text>
+<rect x="538.6" y="514" width="60.0" height="26" fill="#d756b7" stroke="white"/>
+<text class="lc" x="568.6" y="531.0">L62</text>
+<rect x="358.6" y="540" width="60.0" height="26" fill="#f1c5d6" stroke="white"/>
+<text class="lc" x="388.6" y="557.0">L15</text>
+<rect x="418.6" y="540" width="60.0" height="26" fill="#e9a0bb" stroke="white"/>
+<text class="lc" x="448.6" y="557.0">L31</text>
+<rect x="478.6" y="540" width="60.0" height="26" fill="#e07ba1" stroke="white"/>
+<text class="lc" x="508.6" y="557.0">L47</text>
+<rect x="538.6" y="540" width="60.0" height="26" fill="#d75686" stroke="white"/>
+<text class="lc" x="568.6" y="557.0">L63</text>
+<text class="ax" x="388.6" y="146" text-anchor="middle">0</text>
+<text class="ax" x="448.6" y="146" text-anchor="middle">8</text>
+<text class="ax" x="508.6" y="146" text-anchor="middle">16</text>
+<text class="ax" x="568.6" y="146" text-anchor="middle">24</text>
+<text class="ax" x="354.6" y="166.0" text-anchor="end">0</text>
+<text class="ax" x="354.6" y="192.0" text-anchor="end">1</text>
+<text class="ax" x="354.6" y="218.0" text-anchor="end">2</text>
+<text class="ax" x="354.6" y="244.0" text-anchor="end">3</text>
+<text class="ax" x="354.6" y="270.0" text-anchor="end">4</text>
+<text class="ax" x="354.6" y="296.0" text-anchor="end">5</text>
+<text class="ax" x="354.6" y="322.0" text-anchor="end">6</text>
+<text class="ax" x="354.6" y="348.0" text-anchor="end">7</text>
+<text class="ax" x="354.6" y="374.0" text-anchor="end">8</text>
+<text class="ax" x="354.6" y="400.0" text-anchor="end">9</text>
+<text class="ax" x="354.6" y="426.0" text-anchor="end">10</text>
+<text class="ax" x="354.6" y="452.0" text-anchor="end">11</text>
+<text class="ax" x="354.6" y="478.0" text-anchor="end">12</text>
+<text class="ax" x="354.6" y="504.0" text-anchor="end">13</text>
+<text class="ax" x="354.6" y="530.0" text-anchor="end">14</text>
+<text class="ax" x="354.6" y="556.0" text-anchor="end">15</text>
+<rect x="358.6" y="150" width="240.0" height="416" fill="none" stroke="#e8590c" stroke-width="2.4"/>
+<rect x="538.6" y="150" width="60.0" height="26" fill="none" stroke="#7048e8" stroke-width="3"/>
+<text class="pt" x="698.6" y="104">thread tile 1x8</text>
+<text class="k" x="698.6" y="119">8 elements</text>
+<text class="k" x="698.6" y="133">cell: register</text>
+<rect x="698.6" y="150.0" width="34" height="30.0" fill="#eef2f7" stroke="white"/>
+<text class="lc" x="715.6" y="169.0">r0</text>
+<rect x="732.6" y="150.0" width="34" height="30.0" fill="#eef2f7" stroke="white"/>
+<text class="lc" x="749.6" y="169.0">r1</text>
+<rect x="766.6" y="150.0" width="34" height="30.0" fill="#eef2f7" stroke="white"/>
+<text class="lc" x="783.6" y="169.0">r2</text>
+<rect x="800.6" y="150.0" width="34" height="30.0" fill="#eef2f7" stroke="white"/>
+<text class="lc" x="817.6" y="169.0">r3</text>
+<rect x="834.6" y="150.0" width="34" height="30.0" fill="#eef2f7" stroke="white"/>
+<text class="lc" x="851.6" y="169.0">r32</text>
+<rect x="868.6" y="150.0" width="34" height="30.0" fill="#eef2f7" stroke="white"/>
+<text class="lc" x="885.6" y="169.0">r33</text>
+<rect x="902.6" y="150.0" width="34" height="30.0" fill="#eef2f7" stroke="white"/>
+<text class="lc" x="919.6" y="169.0">r34</text>
+<rect x="936.6" y="150.0" width="34" height="30.0" fill="#eef2f7" stroke="white"/>
+<text class="lc" x="953.6" y="169.0">r35</text>
+<text class="ax" x="715.6" y="146" text-anchor="middle">0</text>
+<text class="ax" x="749.6" y="146" text-anchor="middle">1</text>
+<text class="ax" x="783.6" y="146" text-anchor="middle">2</text>
+<text class="ax" x="817.6" y="146" text-anchor="middle">3</text>
+<text class="ax" x="851.6" y="146" text-anchor="middle">4</text>
+<text class="ax" x="885.6" y="146" text-anchor="middle">5</text>
+<text class="ax" x="919.6" y="146" text-anchor="middle">6</text>
+<text class="ax" x="953.6" y="146" text-anchor="middle">7</text>
+<text class="ax" x="694.6" y="168.0" text-anchor="end">0</text>
+<rect x="698.6" y="150" width="272" height="30.0" fill="none" stroke="#7048e8" stroke-width="2.4"/>
+<text x="14" y="592" xml:space="preserve">reg   r0(0, 1)  r1(0, 2)  r2(16, 0)  r3(32, 0)  r4(64, 0)  r5(0, 4)</text>
+<text x="14" y="608" xml:space="preserve">lane  l0(1, 0)  l1(2, 0)  l2(4, 0)  l3(8, 0)  l4(0, 8)  l5(0, 16)</text>
+<text x="14" y="624" xml:space="preserve">warp  -</text>
+<text x="14" y="640" xml:space="preserve">element coordinate = XOR of the bases of all set reg / lane / warp bits</text>
+<text class="k" x="14" y="670">lane colour key</text>
+<rect x="14" y="678" width="26" height="16" fill="#f1c5c5" stroke="white"/>
+<text class="c" x="27.0" y="690">0</text>
+<rect x="40" y="678" width="26" height="16" fill="#f1d6c5" stroke="white"/>
+<text class="c" x="53.0" y="690">1</text>
+<rect x="66" y="678" width="26" height="16" fill="#f1e6c5" stroke="white"/>
+<text class="c" x="79.0" y="690">2</text>
+<rect x="92" y="678" width="26" height="16" fill="#ecf1c5" stroke="white"/>
+<text class="c" x="105.0" y="690">3</text>
+<rect x="118" y="678" width="26" height="16" fill="#dbf1c5" stroke="white"/>
+<text class="c" x="131.0" y="690">4</text>
+<rect x="144" y="678" width="26" height="16" fill="#cbf1c5" stroke="white"/>
+<text class="c" x="157.0" y="690">5</text>
+<rect x="170" y="678" width="26" height="16" fill="#c5f1d0" stroke="white"/>
+<text class="c" x="183.0" y="690">6</text>
+<rect x="196" y="678" width="26" height="16" fill="#c5f1e1" stroke="white"/>
+<text class="c" x="209.0" y="690">7</text>
+<rect x="222" y="678" width="26" height="16" fill="#c5f1f1" stroke="white"/>
+<text class="c" x="235.0" y="690">8</text>
+<rect x="248" y="678" width="26" height="16" fill="#c5e1f1" stroke="white"/>
+<text class="c" x="261.0" y="690">9</text>
+<rect x="274" y="678" width="26" height="16" fill="#c5d0f1" stroke="white"/>
+<text class="c" x="287.0" y="690">10</text>
+<rect x="300" y="678" width="26" height="16" fill="#cbc5f1" stroke="white"/>
+<text class="c" x="313.0" y="690">11</text>
+<rect x="326" y="678" width="26" height="16" fill="#dbc5f1" stroke="white"/>
+<text class="c" x="339.0" y="690">12</text>
+<rect x="352" y="678" width="26" height="16" fill="#ecc5f1" stroke="white"/>
+<text class="c" x="365.0" y="690">13</text>
+<rect x="378" y="678" width="26" height="16" fill="#f1c5e6" stroke="white"/>
+<text class="c" x="391.0" y="690">14</text>
+<rect x="404" y="678" width="26" height="16" fill="#f1c5d6" stroke="white"/>
+<text class="c" x="417.0" y="690">15</text>
+<rect x="14" y="694" width="26" height="16" fill="#e9a0a0" stroke="white"/>
+<text class="c" x="27.0" y="706">16</text>
+<rect x="40" y="694" width="26" height="16" fill="#e9bba0" stroke="white"/>
+<text class="c" x="53.0" y="706">17</text>
+<rect x="66" y="694" width="26" height="16" fill="#e9d7a0" stroke="white"/>
+<text class="c" x="79.0" y="706">18</text>
+<rect x="92" y="694" width="26" height="16" fill="#e0e9a0" stroke="white"/>
+<text class="c" x="105.0" y="706">19</text>
+<rect x="118" y="694" width="26" height="16" fill="#c4e9a0" stroke="white"/>
+<text class="c" x="131.0" y="706">20</text>
+<rect x="144" y="694" width="26" height="16" fill="#a9e9a0" stroke="white"/>
+<text class="c" x="157.0" y="706">21</text>
+<rect x="170" y="694" width="26" height="16" fill="#a0e9b2" stroke="white"/>
+<text class="c" x="183.0" y="706">22</text>
+<rect x="196" y="694" width="26" height="16" fill="#a0e9cd" stroke="white"/>
+<text class="c" x="209.0" y="706">23</text>
+<rect x="222" y="694" width="26" height="16" fill="#a0e9e9" stroke="white"/>
+<text class="c" x="235.0" y="706">24</text>
+<rect x="248" y="694" width="26" height="16" fill="#a0cde9" stroke="white"/>
+<text class="c" x="261.0" y="706">25</text>
+<rect x="274" y="694" width="26" height="16" fill="#a0b2e9" stroke="white"/>
+<text class="c" x="287.0" y="706">26</text>
+<rect x="300" y="694" width="26" height="16" fill="#a9a0e9" stroke="white"/>
+<text class="c" x="313.0" y="706">27</text>
+<rect x="326" y="694" width="26" height="16" fill="#c4a0e9" stroke="white"/>
+<text class="c" x="339.0" y="706">28</text>
+<rect x="352" y="694" width="26" height="16" fill="#e0a0e9" stroke="white"/>
+<text class="c" x="365.0" y="706">29</text>
+<rect x="378" y="694" width="26" height="16" fill="#e9a0d7" stroke="white"/>
+<text class="c" x="391.0" y="706">30</text>
+<rect x="404" y="694" width="26" height="16" fill="#e9a0bb" stroke="white"/>
+<text class="c" x="417.0" y="706">31</text>
+<rect x="14" y="710" width="26" height="16" fill="#e07b7b" stroke="white"/>
+<text class="c" x="27.0" y="722">32</text>
+<rect x="40" y="710" width="26" height="16" fill="#e0a17b" stroke="white"/>
+<text class="c" x="53.0" y="722">33</text>
+<rect x="66" y="710" width="26" height="16" fill="#e0c77b" stroke="white"/>
+<text class="c" x="79.0" y="722">34</text>
+<rect x="92" y="710" width="26" height="16" fill="#d3e07b" stroke="white"/>
+<text class="c" x="105.0" y="722">35</text>
+<rect x="118" y="710" width="26" height="16" fill="#ade07b" stroke="white"/>
+<text class="c" x="131.0" y="722">36</text>
+<rect x="144" y="710" width="26" height="16" fill="#87e07b" stroke="white"/>
+<text class="c" x="157.0" y="722">37</text>
+<rect x="170" y="710" width="26" height="16" fill="#7be094" stroke="white"/>
+<text class="c" x="183.0" y="722">38</text>
+<rect x="196" y="710" width="26" height="16" fill="#7be0ba" stroke="white"/>
+<text class="c" x="209.0" y="722">39</text>
+<rect x="222" y="710" width="26" height="16" fill="#7be0e0" stroke="white"/>
+<text class="c" x="235.0" y="722">40</text>
+<rect x="248" y="710" width="26" height="16" fill="#7bbae0" stroke="white"/>
+<text class="c" x="261.0" y="722">41</text>
+<rect x="274" y="710" width="26" height="16" fill="#7b94e0" stroke="white"/>
+<text class="c" x="287.0" y="722">42</text>
+<rect x="300" y="710" width="26" height="16" fill="#877be0" stroke="white"/>
+<text class="c" x="313.0" y="722">43</text>
+<rect x="326" y="710" width="26" height="16" fill="#ad7be0" stroke="white"/>
+<text class="c" x="339.0" y="722">44</text>
+<rect x="352" y="710" width="26" height="16" fill="#d37be0" stroke="white"/>
+<text class="c" x="365.0" y="722">45</text>
+<rect x="378" y="710" width="26" height="16" fill="#e07bc7" stroke="white"/>
+<text class="c" x="391.0" y="722">46</text>
+<rect x="404" y="710" width="26" height="16" fill="#e07ba1" stroke="white"/>
+<text class="c" x="417.0" y="722">47</text>
+<rect x="14" y="726" width="26" height="16" fill="#d75656" stroke="white"/>
+<text class="c" x="27.0" y="738">48</text>
+<rect x="40" y="726" width="26" height="16" fill="#d78656" stroke="white"/>
+<text class="c" x="53.0" y="738">49</text>
+<rect x="66" y="726" width="26" height="16" fill="#d7b756" stroke="white"/>
+<text class="c" x="79.0" y="738">50</text>
+<rect x="92" y="726" width="26" height="16" fill="#c7d756" stroke="white"/>
+<text class="c" x="105.0" y="738">51</text>
+<rect x="118" y="726" width="26" height="16" fill="#96d756" stroke="white"/>
+<text class="c" x="131.0" y="738">52</text>
+<rect x="144" y="726" width="26" height="16" fill="#66d756" stroke="white"/>
+<text class="c" x="157.0" y="738">53</text>
+<rect x="170" y="726" width="26" height="16" fill="#56d776" stroke="white"/>
+<text class="c" x="183.0" y="738">54</text>
+<rect x="196" y="726" width="26" height="16" fill="#56d7a7" stroke="white"/>
+<text class="c" x="209.0" y="738">55</text>
+<rect x="222" y="726" width="26" height="16" fill="#56d7d7" stroke="white"/>
+<text class="c" x="235.0" y="738">56</text>
+<rect x="248" y="726" width="26" height="16" fill="#56a7d7" stroke="white"/>
+<text class="c" x="261.0" y="738">57</text>
+<rect x="274" y="726" width="26" height="16" fill="#5676d7" stroke="white"/>
+<text class="c" x="287.0" y="738">58</text>
+<rect x="300" y="726" width="26" height="16" fill="#6656d7" stroke="white"/>
+<text class="c" x="313.0" y="738">59</text>
+<rect x="326" y="726" width="26" height="16" fill="#9656d7" stroke="white"/>
+<text class="c" x="339.0" y="738">60</text>
+<rect x="352" y="726" width="26" height="16" fill="#c756d7" stroke="white"/>
+<text class="c" x="365.0" y="738">61</text>
+<rect x="378" y="726" width="26" height="16" fill="#d756b7" stroke="white"/>
+<text class="c" x="391.0" y="738">62</text>
+<rect x="404" y="726" width="26" height="16" fill="#d75686" stroke="white"/>
+<text class="c" x="417.0" y="738">63</text>
+<text class="mh" x="601.0" y="670">Reg</text>
+<text class="mh" x="701.0" y="670">Lane</text>
+<text class="ml" x="535" y="692.5">n</text>
+<text class="ml" x="535" y="777.5">m</text>
+<text class="m1" x="563.5" y="692.5">1</text>
+<text class="m0" x="578.5" y="692.5">0</text>
+<text class="m0" x="593.5" y="692.5">0</text>
+<text class="m0" x="608.5" y="692.5">0</text>
+<text class="m0" x="623.5" y="692.5">0</text>
+<text class="m0" x="638.5" y="692.5">0</text>
+<text class="m0" x="663.5" y="692.5">0</text>
+<text class="m0" x="678.5" y="692.5">0</text>
+<text class="m0" x="693.5" y="692.5">0</text>
+<text class="m0" x="708.5" y="692.5">0</text>
+<text class="m0" x="723.5" y="692.5">0</text>
+<text class="m0" x="738.5" y="692.5">0</text>
+<text class="m0" x="563.5" y="709.5">0</text>
+<text class="m1" x="578.5" y="709.5">1</text>
+<text class="m0" x="593.5" y="709.5">0</text>
+<text class="m0" x="608.5" y="709.5">0</text>
+<text class="m0" x="623.5" y="709.5">0</text>
+<text class="m0" x="638.5" y="709.5">0</text>
+<text class="m0" x="663.5" y="709.5">0</text>
+<text class="m0" x="678.5" y="709.5">0</text>
+<text class="m0" x="693.5" y="709.5">0</text>
+<text class="m0" x="708.5" y="709.5">0</text>
+<text class="m0" x="723.5" y="709.5">0</text>
+<text class="m0" x="738.5" y="709.5">0</text>
+<text class="m0" x="563.5" y="726.5">0</text>
+<text class="m0" x="578.5" y="726.5">0</text>
+<text class="m0" x="593.5" y="726.5">0</text>
+<text class="m0" x="608.5" y="726.5">0</text>
+<text class="m0" x="623.5" y="726.5">0</text>
+<text class="m1" x="638.5" y="726.5">1</text>
+<text class="m0" x="663.5" y="726.5">0</text>
+<text class="m0" x="678.5" y="726.5">0</text>
+<text class="m0" x="693.5" y="726.5">0</text>
+<text class="m0" x="708.5" y="726.5">0</text>
+<text class="m0" x="723.5" y="726.5">0</text>
+<text class="m0" x="738.5" y="726.5">0</text>
+<text class="m0" x="563.5" y="743.5">0</text>
+<text class="m0" x="578.5" y="743.5">0</text>
+<text class="m0" x="593.5" y="743.5">0</text>
+<text class="m0" x="608.5" y="743.5">0</text>
+<text class="m0" x="623.5" y="743.5">0</text>
+<text class="m0" x="638.5" y="743.5">0</text>
+<text class="m0" x="663.5" y="743.5">0</text>
+<text class="m0" x="678.5" y="743.5">0</text>
+<text class="m0" x="693.5" y="743.5">0</text>
+<text class="m0" x="708.5" y="743.5">0</text>
+<text class="m1" x="723.5" y="743.5">1</text>
+<text class="m0" x="738.5" y="743.5">0</text>
+<text class="m0" x="563.5" y="760.5">0</text>
+<text class="m0" x="578.5" y="760.5">0</text>
+<text class="m0" x="593.5" y="760.5">0</text>
+<text class="m0" x="608.5" y="760.5">0</text>
+<text class="m0" x="623.5" y="760.5">0</text>
+<text class="m0" x="638.5" y="760.5">0</text>
+<text class="m0" x="663.5" y="760.5">0</text>
+<text class="m0" x="678.5" y="760.5">0</text>
+<text class="m0" x="693.5" y="760.5">0</text>
+<text class="m0" x="708.5" y="760.5">0</text>
+<text class="m0" x="723.5" y="760.5">0</text>
+<text class="m1" x="738.5" y="760.5">1</text>
+<text class="m0" x="563.5" y="777.5">0</text>
+<text class="m0" x="578.5" y="777.5">0</text>
+<text class="m0" x="593.5" y="777.5">0</text>
+<text class="m0" x="608.5" y="777.5">0</text>
+<text class="m0" x="623.5" y="777.5">0</text>
+<text class="m0" x="638.5" y="777.5">0</text>
+<text class="m1" x="663.5" y="777.5">1</text>
+<text class="m0" x="678.5" y="777.5">0</text>
+<text class="m0" x="693.5" y="777.5">0</text>
+<text class="m0" x="708.5" y="777.5">0</text>
+<text class="m0" x="723.5" y="777.5">0</text>
+<text class="m0" x="738.5" y="777.5">0</text>
+<text class="m0" x="563.5" y="794.5">0</text>
+<text class="m0" x="578.5" y="794.5">0</text>
+<text class="m0" x="593.5" y="794.5">0</text>
+<text class="m0" x="608.5" y="794.5">0</text>
+<text class="m0" x="623.5" y="794.5">0</text>
+<text class="m0" x="638.5" y="794.5">0</text>
+<text class="m0" x="663.5" y="794.5">0</text>
+<text class="m1" x="678.5" y="794.5">1</text>
+<text class="m0" x="693.5" y="794.5">0</text>
+<text class="m0" x="708.5" y="794.5">0</text>
+<text class="m0" x="723.5" y="794.5">0</text>
+<text class="m0" x="738.5" y="794.5">0</text>
+<text class="m0" x="563.5" y="811.5">0</text>
+<text class="m0" x="578.5" y="811.5">0</text>
+<text class="m0" x="593.5" y="811.5">0</text>
+<text class="m0" x="608.5" y="811.5">0</text>
+<text class="m0" x="623.5" y="811.5">0</text>
+<text class="m0" x="638.5" y="811.5">0</text>
+<text class="m0" x="663.5" y="811.5">0</text>
+<text class="m0" x="678.5" y="811.5">0</text>
+<text class="m1" x="693.5" y="811.5">1</text>
+<text class="m0" x="708.5" y="811.5">0</text>
+<text class="m0" x="723.5" y="811.5">0</text>
+<text class="m0" x="738.5" y="811.5">0</text>
+<text class="m0" x="563.5" y="828.5">0</text>
+<text class="m0" x="578.5" y="828.5">0</text>
+<text class="m0" x="593.5" y="828.5">0</text>
+<text class="m0" x="608.5" y="828.5">0</text>
+<text class="m0" x="623.5" y="828.5">0</text>
+<text class="m0" x="638.5" y="828.5">0</text>
+<text class="m0" x="663.5" y="828.5">0</text>
+<text class="m0" x="678.5" y="828.5">0</text>
+<text class="m0" x="693.5" y="828.5">0</text>
+<text class="m1" x="708.5" y="828.5">1</text>
+<text class="m0" x="723.5" y="828.5">0</text>
+<text class="m0" x="738.5" y="828.5">0</text>
+<text class="m0" x="563.5" y="845.5">0</text>
+<text class="m0" x="578.5" y="845.5">0</text>
+<text class="m1" x="593.5" y="845.5">1</text>
+<text class="m0" x="608.5" y="845.5">0</text>
+<text class="m0" x="623.5" y="845.5">0</text>
+<text class="m0" x="638.5" y="845.5">0</text>
+<text class="m0" x="663.5" y="845.5">0</text>
+<text class="m0" x="678.5" y="845.5">0</text>
+<text class="m0" x="693.5" y="845.5">0</text>
+<text class="m0" x="708.5" y="845.5">0</text>
+<text class="m0" x="723.5" y="845.5">0</text>
+<text class="m0" x="738.5" y="845.5">0</text>
+<text class="m0" x="563.5" y="862.5">0</text>
+<text class="m0" x="578.5" y="862.5">0</text>
+<text class="m0" x="593.5" y="862.5">0</text>
+<text class="m1" x="608.5" y="862.5">1</text>
+<text class="m0" x="623.5" y="862.5">0</text>
+<text class="m0" x="638.5" y="862.5">0</text>
+<text class="m0" x="663.5" y="862.5">0</text>
+<text class="m0" x="678.5" y="862.5">0</text>
+<text class="m0" x="693.5" y="862.5">0</text>
+<text class="m0" x="708.5" y="862.5">0</text>
+<text class="m0" x="723.5" y="862.5">0</text>
+<text class="m0" x="738.5" y="862.5">0</text>
+<text class="m0" x="563.5" y="879.5">0</text>
+<text class="m0" x="578.5" y="879.5">0</text>
+<text class="m0" x="593.5" y="879.5">0</text>
+<text class="m0" x="608.5" y="879.5">0</text>
+<text class="m1" x="623.5" y="879.5">1</text>
+<text class="m0" x="638.5" y="879.5">0</text>
+<text class="m0" x="663.5" y="879.5">0</text>
+<text class="m0" x="678.5" y="879.5">0</text>
+<text class="m0" x="693.5" y="879.5">0</text>
+<text class="m0" x="708.5" y="879.5">0</text>
+<text class="m0" x="723.5" y="879.5">0</text>
+<text class="m0" x="738.5" y="879.5">0</text>
+<path d="M535 676H746.0 M551.0 676V886 M651.0 676V886 M535 765H746.0 M532 658H526V888H532 M748.0 658H754.0V888H748.0" stroke="#222" stroke-width="1.2" fill="none"/>
+<text class="ma" x="486" y="778.0">A =</text>
+<text class="k" x="486" y="904">w = A v (mod 2)</text>
+<text class="k" x="486" y="918">v: reg | lane | warp bits</text>
+<text class="k" x="486" y="932">w: coordinate bits, low bit first</text>
+</svg>
